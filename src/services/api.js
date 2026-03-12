@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 let logoutExecutado = false;
 
 const api = axios.create({
-  baseURL: "https://localhost:7243"
+  baseURL: "https://apigest-obet.onrender.com"
 });
 
 api.interceptors.request.use(config => {
