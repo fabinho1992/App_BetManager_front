@@ -1,0 +1,86 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0f172a;
+  padding: 20px;
+}
+
+.card {
+   background: #020617;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+
+.intro p {
+  max-width: 440px;
+  font-size: 18px;
+  line-height: 32px;
+  text-wrap: balance;
+  color: var(--text-secondary);
+}
+
+.title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+  letter-spacing: -2.4px;
+  text-wrap: balance;
+  color: #e1dfdf;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 30px;
+  font-size: 15px;
+}
+
+.button {
+  width: 10%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.button:hover {
+  background-color: #16305a;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 20px;
+}
+
+.badgeCache {
+  margin-left: 10px;
+  padding: 4px 10px;
+  background-color: #28a745;
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.badgeApi {
+  margin-left: 10px;
+  padding: 4px 10px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+}
+

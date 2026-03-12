@@ -1,0 +1,63 @@
+.container {
+    width: 100%;
+    min-height: 100vh;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 40px;
+}
+
+.casasContainer {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    gap: 25px;
+    width: 100%;
+    max-width: 900px;
+}
+
+.casaCard {
+    width: 180px;
+    height: 110px;
+    background: linear-gradient(145deg,
+            #0f172a,
+            #020617);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: 2px solid #1e293b;
+    transition: all 0.25s ease;
+}
+
+.casaCard:hover {
+    transform: translateY(-5px);
+    border-color: #3b82f6;
+    box-shadow: 0 0 12px #3b82f6;
+}
+
+.casaNome {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #f1f5f9;
+}
+
+.casaQuantidade {
+    font-size: 15px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.verTodosContainer {
+    margin-top: 40px;
+}
