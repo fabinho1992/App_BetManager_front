@@ -18,7 +18,7 @@ export default function Register() {
     e.preventDefault();
 
     try {
-      await api.post("/usuario", {
+      await api.post("/Usuario", {
         displayName: formData.displayName,
         cpf: formData.cpf,
         email: formData.email,
