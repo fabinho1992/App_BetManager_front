@@ -20,6 +20,7 @@ export default function Dashboard() {
             const res = await api.get("/Bilhete/dashboard");
 
             if (!res.data?.data || res.data.data.length === 0) {
+                 toast.info("Faça seu primeiro bilhete!");
                 router.push("/criar-bilhete");
                 return;
             }
