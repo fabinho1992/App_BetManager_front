@@ -19,6 +19,10 @@ export default function Register() {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    if (loading) return; // proteção extra
+
+    setLoading(true);
+
     try {
       await api.post("/Usuario", {
         displayName: formData.displayName,
@@ -36,7 +40,7 @@ export default function Register() {
       console.log("Response:", error.response?.data);
       console.log("Mensagem:", error.response?.data?.Erros?.[0]?.Message);
       alert(error.response?.data?.Erros?.[0]?.Message || "Erro ao cadastrar usuário");
-    }finally {
+    } finally {
       setLoading(false);
     }
   }
