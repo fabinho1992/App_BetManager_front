@@ -37,11 +37,7 @@ export default function Dashboard() {
         try {
 
             const res = await api.get("/Bilhete/resumoCasaApostas");
-            // if (!res.data?.data || res.data.data.length === 0) {
-
-            //     router.push("/criar-bilhete");
-            //     return;
-            // }
+            
             console.log(res.data);
 
             setCasas(res.data.data);
