@@ -35,45 +35,44 @@ export default function GraficoPizza({ ganhas, perdidas }) {
 
   return (
     <PieChart width={400} height={300}>
+
+      <defs>
+        <linearGradient id="greenGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#00e676" />
+          <stop offset="100%" stopColor="#00c853" />
+        </linearGradient>
+
+        <linearGradient id="redGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ff5252" />
+          <stop offset="100%" stopColor="#d50000" />
+        </linearGradient>
+      </defs>
+
       <Pie
         data={data}
         cx="50%"
         cy="50%"
-        innerRadius={60} // donut chart
+        innerRadius={60}
         outerRadius={100}
-        paddingAngle={4} // espaço entre slices
+        paddingAngle={4}
         dataKey="value"
         label={renderLabel}
         labelLine={false}
-        isAnimationActive={true}
-        animationDuration={1000}
       >
-        {data.map((entry, index) => (
-          <Cell
-            key={index}
-            fill={COLORS[index]}
-            stroke="#fff" // borda branca fina
-            strokeWidth={2}
-            style={{ filter: "drop-shadow(0 0 5px rgba(0,0,0,0.3))" }} // sombra suave
-          />
-        ))}
+        <Cell fill="url(#greenGradient)" />
+        <Cell fill="url(#redGradient)" />
       </Pie>
+
       <Tooltip
         contentStyle={{
           backgroundColor: "#1f1f1f",
           borderRadius: "8px",
           color: "#fff",
-          fontSize: "14px",
           border: "none",
         }}
-        itemStyle={{ color: "#fff" }}
       />
-      <Legend
-        verticalAlign="bottom"
-        height={36}
-        iconType="circle"
-        wrapperStyle={{ fontSize: "14px" }}
-      />
+
+      <Legend iconType="circle" />
     </PieChart>
   );
 }
