@@ -12,10 +12,18 @@ import toast from "react-hot-toast";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState("");
   const router = useRouter();
+
+  function navegarPara(pagina) {
+    setLoadingPage(pagina);
+    router.push(pagina);
+  }
 
   async function handleLogin(e) {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await api.post("/Auth/login", {
@@ -29,6 +37,8 @@ export default function LoginPage() {
 
     } catch {
       toast.error("email ou senha incorretos!");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -65,15 +75,29 @@ export default function LoginPage() {
             onChange={e => setPassword(e.target.value)}
           />
 
-          <button className={form.button}>Entrar</button>
+          <button className={form.button} disabled={loading}>
+            {loading ? "⏳ Entrando..." : "Entrar"}
+          </button>
         </form>
+        <div className={form.buttons}>
+          <button
+            type="button"
+            className={form.buttonCriarUser}
+            onClick={() => navegarPara("/register")}
+            disabled={loadingPage === "/register"}
+          >
+            {loadingPage === "/register" ? "⏳ Abrindo..." : "Criar usuário"}
+          </button>
+          <button
+            type="button"
+            className={form.buttonRecuperarSenha}
+            onClick={() => navegarPara("/resetsenha")}
+            disabled={loadingPage === "/resetsenha"}
+          >
+            {loadingPage === "/resetsenha" ? "⏳ Abrindo..." : "Recuperar senha"}
+          </button>
 
-        <p>
-          Não tem conta?{" "}
-          <Link href="/register" className={form.buttonCriarUser}>
-            Criar usuário
-          </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

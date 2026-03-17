@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import api from "@/services/api";
 import form from "@/styles/form.module.css";
 import layout from "@/styles/layout.module.css";
+import toast from "react-hot-toast";
 
 export default function Register() {
   const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   function handleChange(e) {
@@ -27,10 +29,15 @@ export default function Register() {
         password: formData.password
       });
 
-      alert("Usuário criado!");
+      toast.success("Usuário criado!");
       router.push("/");
-    } catch {
-      alert("Erro ao cadastrar usuário");
+    } catch (error) {
+      console.log("Erro completo:", error);
+      console.log("Response:", error.response?.data);
+      console.log("Mensagem:", error.response?.data?.Erros?.[0]?.Message);
+      alert(error.response?.data?.Erros?.[0]?.Message || "Erro ao cadastrar usuário");
+    }finally {
+      setLoading(false);
     }
   }
 
@@ -47,7 +54,9 @@ export default function Register() {
           <input className={form.input} name="metaBanca" placeholder="Meta da Banca" onChange={handleChange} />
           <input className={form.input} type="password" name="password" placeholder="Senha" onChange={handleChange} />
 
-          <button className={form.button}>Cadastrar</button>
+          <button className={form.button} disabled={loading}>
+            {loading ? "⏳ Cadastrando..." : "Cadastrar"}
+          </button>
         </form>
       </div>
     </div>

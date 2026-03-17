@@ -368,7 +368,8 @@ export default function BilhetesContent({casa}) {
                 {bilhetes.map(b => (
                   <tr
                     key={b.id}
-                    onClick={() => setBilheteSelecionado(b.id)}
+                    onClick={() => setBilheteSelecionado(bilheteSelecionado === b.id ? null : b.id)}
+                    onTouchStart={() => setBilheteSelecionado(bilheteSelecionado === b.id ? null : b.id)}
                     className={bilheteSelecionado === b.id ? table.selectedRow : ""}
                   >
                     <td>{b.usuarioNome}</td>

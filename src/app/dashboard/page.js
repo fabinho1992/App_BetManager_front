@@ -20,7 +20,7 @@ export default function Dashboard() {
             const res = await api.get("/Bilhete/dashboard");
 
             if (!res.data?.data || res.data.data.length === 0) {
-                 toast.info("Faça seu primeiro bilhete!");
+                toast.info("Faça seu primeiro bilhete!");
                 router.push("/criar-bilhete");
                 return;
             }
@@ -38,7 +38,7 @@ export default function Dashboard() {
 
             const res = await api.get("/Bilhete/resumoCasaApostas");
             if (!res.data?.data || res.data.data.length === 0) {
-                
+
                 router.push("/criar-bilhete");
                 return;
             }
@@ -122,10 +122,17 @@ export default function Dashboard() {
             <div className={dashboard.verTodosContainer}>
 
                 <button
-                    className={layout.buttonPrimary}
+                    className={layout.buttonFilter}
                     onClick={() => router.push("/bilhetes")}
                 >
                     Ver todos os bilhetes
+                </button>
+
+                <button
+                    className={layout.buttonPrimary}
+                    onClick={() => router.push("/criar-bilhete")}
+                >
+                    + Criar Bilhete
                 </button>
 
             </div>

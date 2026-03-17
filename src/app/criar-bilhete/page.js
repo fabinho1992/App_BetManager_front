@@ -14,6 +14,7 @@ export default function CriarBilhete() {
   const [tipoAposta, setTipoAposta] = useState(null);
   const [statusAposta, setStatusAposta] = useState(null);
   const [casaAposta, setCasaAposta] = useState(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,12 +27,14 @@ export default function CriarBilhete() {
     e.preventDefault();
 
     try {
+      setLoading(true);
       await api.post("/bilhete", {
         odd: Number(odd),
         valorApostado: Number(valorApostado),
         tipoBanca: tipoAposta,
         statusEnum: statusAposta,
         casaAposta: casaAposta
+
       });
 
       toast.success("Bilhete criado com sucesso!");
@@ -42,8 +45,10 @@ export default function CriarBilhete() {
       console.error("Response:", error.response?.data);
       toast.error("Erro ao criar bilhete");
     }
+    finally {
+      setLoading(false);
+    }
   }
-
   return (
     <div className={layout.container}>
       <div className={layout.card}>
@@ -101,7 +106,9 @@ export default function CriarBilhete() {
             <option value="3">Cancelada</option>
           </select>
 
-          <button className={form.button}>Criar</button>
+          <button className={form.button} disabled={loading}>
+            {loading ? "⏳ Criando..." : "Criar"}
+          </button>
         </form>
       </div>
     </div>
