@@ -7,6 +7,7 @@ import layout from "@/styles/layout.module.css";
 import dashboard from "@/styles/dashboard.module.css";
 import toast from "react-hot-toast";
 import GraficoPizza from "@/app/components/GraficoPizza";
+import emptyWallet from "@/public/icons/empty-wallet.svg";
 
 export default function Dashboard() {
 
@@ -88,14 +89,14 @@ export default function Dashboard() {
 
             <h1 className={dashboard.title}>Dashboard</h1>
 
-            {dadosDashboard && (dadosDashboard.totalGanhas + dadosDashboard.totalPerdidas > 0) ? (
+              {dadosDashboard && (dadosDashboard.totalGanhas + dadosDashboard.totalPerdidas > 0) ? (
                 <GraficoPizza
                     ganhas={dadosDashboard.totalGanhas}
                     perdidas={dadosDashboard.totalPerdidas}
                 />
             ) : (
                 <div className={dashboard.semBilhetes}>
-                    <img src="/icons/empty-wallet.svg" alt="Sem apostas" />
+                    <div style={{ fontSize: "5rem", marginBottom: "1rem" }}>💰</div>
                     <p>Você ainda não fez nenhuma aposta.</p>
                     <button
                         className={layout.buttonPrimary}
