@@ -7,7 +7,6 @@ import layout from "@/styles/layout.module.css";
 import dashboard from "@/styles/dashboard.module.css";
 import toast from "react-hot-toast";
 import GraficoPizza from "@/app/components/GraficoPizza";
-import emptyWallet from "@/public/icons/empty-wallet.svg";
 
 export default function Dashboard() {
 
