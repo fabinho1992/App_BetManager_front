@@ -63,3 +63,19 @@
     display: flex;
     gap: 1rem;
 }
+
+.semBilhetes {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #555;
+}
+
+.semBilhetes img {
+    width: 150px;
+    margin-bottom: 1rem;
+}
+
+.semBilhetes p {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}

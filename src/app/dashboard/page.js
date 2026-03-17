@@ -88,11 +88,22 @@ export default function Dashboard() {
 
             <h1 className={dashboard.title}>Dashboard</h1>
 
-            {dadosDashboard && (
+            {dadosDashboard && (dadosDashboard.totalGanhas + dadosDashboard.totalPerdidas > 0) ? (
                 <GraficoPizza
                     ganhas={dadosDashboard.totalGanhas}
                     perdidas={dadosDashboard.totalPerdidas}
                 />
+            ) : (
+                <div className={dashboard.semBilhetes}>
+                    <img src="/icons/empty-wallet.svg" alt="Sem apostas" />
+                    <p>Você ainda não fez nenhuma aposta.</p>
+                    <button
+                        className={layout.buttonPrimary}
+                        onClick={() => router.push("/criar-bilhete")}
+                    >
+                        + Criar sua primeira aposta
+                    </button>
+                </div>
             )}
 
             <div className={dashboard.casasContainer}>
