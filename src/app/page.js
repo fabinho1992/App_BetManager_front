@@ -35,7 +35,9 @@ export default function LoginPage() {
       console.log(response.data);
       router.push("/dashboard");
 
-    } catch {
+    } catch(error) {
+      console.log(error);
+      console.log(error.response);
       toast.error("email ou senha incorretos!");
     } finally {
       setLoading(false);
