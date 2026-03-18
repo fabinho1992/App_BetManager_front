@@ -31,6 +31,7 @@ export default function LoginPage() {
         password
       });
 
+      localStorage.setItem("email", email);
       localStorage.setItem("token", response.data.data.token);
       console.log(response.data);
       router.push("/dashboard");
