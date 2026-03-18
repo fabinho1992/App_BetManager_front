@@ -17,6 +17,26 @@ export default function CriarBilhete() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  function formatCurrency(value) {
+    value = value.replace(/\D/g, "");
+
+    const number = Number(value) / 100;
+
+    return number.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
+
+  function parseCurrency(value) {
+    if (!value) return 0;
+
+    return Number(
+      value
+        .replace(/\D/g, "") // remove tudo
+    ) / 100;
+  }
+
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       router.push("/");
@@ -30,7 +50,7 @@ export default function CriarBilhete() {
       setLoading(true);
       await api.post("/bilhete", {
         odd: Number(odd),
-        valorApostado: Number(valorApostado),
+        valorApostado: parseCurrency(valorApostado),
         tipoBanca: tipoAposta,
         statusEnum: statusAposta,
         casaAposta: casaAposta
@@ -65,10 +85,10 @@ export default function CriarBilhete() {
 
           <input
             className={form.input}
-            type="number"
-            placeholder="Valor Apostado"
+            type="text"
+            placeholder="R$ 0,00"
             value={valorApostado}
-            onChange={e => setValorApostado(e.target.value)}
+            onChange={(e) => setValorApostado(formatCurrency(e.target.value))}
           />
 
           <select

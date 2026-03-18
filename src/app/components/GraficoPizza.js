@@ -8,8 +8,6 @@ export default function GraficoPizza({ ganhas, perdidas }) {
     { name: "Perdidos", value: perdidas },
   ];
 
-  // cores verde e vermelho vibrantes
-  const COLORS = ["#28a745", "#dc3545"];
 
   // label dentro do slice mostrando percentual
   const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {

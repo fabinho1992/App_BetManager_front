@@ -9,10 +9,13 @@ import toast from "react-hot-toast";
 import GraficoPizza from "@/app/components/GraficoPizza";
 
 export default function Dashboard() {
-
+    
     const [casas, setCasas] = useState([]);
     const [dadosDashboard, setDadosDashboard] = useState(null);
     const router = useRouter();
+    const temBilhetes =
+        dadosDashboard &&
+        (dadosDashboard.totalGanhas + dadosDashboard.totalPerdidas > 0);
 
     async function carregarResumo() {
         try {
@@ -21,7 +24,6 @@ export default function Dashboard() {
 
             if (!res.data?.data || res.data.data.length === 0) {
                 toast.info("Faça seu primeiro bilhete!");
-                router.push("/criar-bilhete");
                 return;
             }
 
@@ -37,7 +39,7 @@ export default function Dashboard() {
         try {
 
             const res = await api.get("/Bilhete/resumoCasaApostas");
-            
+
             console.log(res.data);
 
             setCasas(res.data.data);
@@ -81,53 +83,85 @@ export default function Dashboard() {
 
     return (
         <div className={dashboard.container}>
-
             <h1 className={dashboard.title}>Dashboard</h1>
 
-              {dadosDashboard && (dadosDashboard.totalGanhas + dadosDashboard.totalPerdidas > 0) ? (
-                <GraficoPizza
-                    ganhas={dadosDashboard.totalGanhas}
-                    perdidas={dadosDashboard.totalPerdidas}
-                />
-            ) : (
-                <div className={dashboard.semBilhetes}>
-                    <div style={{ fontSize: "5rem", marginBottom: "1rem" }}>💰</div>
-                    <p>Você ainda não fez nenhuma aposta.</p>
-                    <button
-                        className={layout.buttonPrimary}
-                        onClick={() => router.push("/criar-bilhete")}
-                    >
-                        + Criar sua primeira aposta
-                    </button>
-                </div>
-            )}
-
-            <div className={dashboard.casasContainer}>
-
-                {casas.map((casa) => (
-
-                    <div
-                        key={casa.casaAposta}
-                        className={dashboard.casaCard}
-                        onClick={() => abrirCasa(casa)}
-                    >
-
-                        <div className={dashboard.casaNome}>
-                            ({casa.casaAposta})
+            {/* 🔴 SEM DADOS */}
+            {!temBilhetes && (
+                <>
+                    {/* CARDS */}
+                    <div className={dashboard.stats}>
+                        <div className={dashboard.card}>
+                            <h3>Ganhos</h3>
+                            <p>0</p>
                         </div>
 
-                        <div className={dashboard.casaQuantidade}>
-                            ({casa.quantidade} bilhetes)
+                        <div className={dashboard.card}>
+                            <h3>Perdidas</h3>
+                            <p>0</p>
                         </div>
 
+                        <div className={dashboard.card}>
+                            <h3>Total</h3>
+                            <p>0</p>
+                        </div>
                     </div>
 
-                ))}
+                    {/* EMPTY STATE */}
+                    <div className={dashboard.emptyState}>
+                        <div className={dashboard.icon}>📊</div>
+                        <h2>Nenhum bilhete ainda</h2>
+                        <p>Comece criando sua primeira aposta para ver seus resultados aqui.</p>
 
-            </div>
+                        <button
+                            className={layout.buttonPrimaryDash}
+                            onClick={() => router.push("/criar-bilhete")}
+                        >
+                            + Criar sua primeira aposta
+                        </button>
+                    </div>
 
+                    {/* DICAS */}
+                    <div className={dashboard.tips}>
+                        <h2>💡 Dicas para começar</h2>
+                        <ul>
+                            <li>✔ Comece com apostas pequenas</li>
+                            <li>✔ Controle sua banca</li>
+                            <li>✔ Evite apostar por emoção</li>
+                        </ul>
+                    </div>
+                </>
+            )}
+
+            {/* 🟢 COM DADOS (SEU DASHBOARD ORIGINAL) */}
+            {temBilhetes && (
+                <>
+                    <GraficoPizza
+                        ganhas={dadosDashboard.totalGanhas}
+                        perdidas={dadosDashboard.totalPerdidas}
+                    />
+
+                    <div className={dashboard.casasContainer}>
+                        {casas.map((casa) => (
+                            <div
+                                key={casa.casaAposta}
+                                className={dashboard.casaCard}
+                                onClick={() => abrirCasa(casa)}
+                            >
+                                <div className={dashboard.casaNome}>
+                                    {casa.casaAposta}
+                                </div>
+
+                                <div className={dashboard.casaQuantidade}>
+                                    {casa.quantidade} bilhetes
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
+
+            {/* 🔵 BOTÕES (sempre visível) */}
             <div className={dashboard.verTodosContainer}>
-
                 <button
                     className={layout.buttonFilter}
                     onClick={() => router.push("/bilhetes")}
@@ -135,15 +169,15 @@ export default function Dashboard() {
                     Ver todos os bilhetes
                 </button>
 
-                <button
-                    className={layout.buttonPrimary}
-                    onClick={() => router.push("/criar-bilhete")}
-                >
-                    + Criar Bilhete
-                </button>
-
+                {temBilhetes && (
+                    <button
+                        className={layout.buttonPrimarydashboard}
+                        onClick={() => router.push("/criar-bilhete")}
+                    >
+                        + Criar Bilhete
+                    </button>
+                )}
             </div>
-
         </div>
     );
 }

@@ -2,6 +2,7 @@
     width: 100%;
     min-height: 100vh;
     padding: 40px 20px;
+    padding-top: 100px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -17,13 +18,13 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    margin-top: 1rem;
     gap: 25px;
     width: 100%;
     max-width: 900px;
 }
 
 .casaCard {
+    margin-top: 1rem;
     width: 180px;
     height: 110px;
     background: linear-gradient(145deg,
@@ -78,4 +79,45 @@
 .semBilhetes p {
     font-size: 1.2rem;
     margin-bottom: 1rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.card {
+  background: #111827;
+  border-radius: 12px;
+  width: 150px;
+  padding: 18px;
+  text-align: center;
+  margin-top: 1rem;
+  border: 1px solid #1f2937;
+  transition: all 0.25s ease;
+}
+
+.emptyState {
+  text-align: center;
+  margin: 40px 0;
+  
+}
+
+.icon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+}
+
+.tips {
+  margin-top: 40px;
+  background: #0f172a;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.tips ul {
+  margin-top: 10px;
+  padding-left: 20px;
 }
