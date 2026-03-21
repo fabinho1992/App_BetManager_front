@@ -9,56 +9,49 @@ import toast from "react-hot-toast";
 import GraficoPizza from "@/app/components/GraficoPizza";
 
 export default function Dashboard() {
-    
     const [casas, setCasas] = useState([]);
     const [dadosDashboard, setDadosDashboard] = useState(null);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
+
     const temBilhetes =
         dadosDashboard &&
         (dadosDashboard.totalGanhas + dadosDashboard.totalPerdidas > 0);
 
     async function carregarResumo() {
         try {
-
             const res = await api.get("/Bilhete/dashboard");
 
-            if (!res.data?.data || res.data.data.length === 0) {
-                toast.info("Faça seu primeiro bilhete!");
+            if (!res.data?.data) {
+                setDadosDashboard(null);
                 return;
             }
 
-
             setDadosDashboard(res.data.data);
-
         } catch (error) {
             console.error(error);
+            setDadosDashboard(null);
         }
     }
 
     async function carregarCasas() {
         try {
-
             const res = await api.get("/Bilhete/resumoCasaApostas");
-
-            console.log(res.data);
-
-            setCasas(res.data.data);
-
+            setCasas(res.data?.data || []);
         } catch (error) {
-
             if (error.response?.status === 401) {
                 localStorage.removeItem("token");
                 router.push("/");
+                return;
             }
 
             console.error(error);
             toast.error("Erro ao carregar dashboard");
-
+            setCasas([]);
         }
     }
 
     function abrirCasa(casa) {
-
         if (casa.quantidade === 0) {
             toast("Nenhum bilhete nessa casa de aposta.");
             return;
@@ -68,27 +61,63 @@ export default function Dashboard() {
     }
 
     useEffect(() => {
+        async function carregarDados() {
+            const token = localStorage.getItem("token");
 
-        const token = localStorage.getItem("token");
+            if (!token) {
+                router.push("/");
+                return;
+            }
 
-        if (!token) {
-            router.push("/");
-            return;
+            setLoading(true);
+
+            try {
+                await Promise.all([
+                    carregarCasas(),
+                    carregarResumo()
+                ]);
+            } finally {
+                setLoading(false);
+            }
         }
 
-        carregarCasas();
-        carregarResumo();
-
+        carregarDados();
     }, [router]);
+
+    if (loading) {
+        return (
+            <div className={dashboard.container}>
+                <h1 className={dashboard.title}>Dashboard</h1>
+
+                <div className={dashboard.stats}>
+                    <div className={`${dashboard.card} ${dashboard.skeleton} ${dashboard.skeletonCard}`}></div>
+                    <div className={`${dashboard.card} ${dashboard.skeleton} ${dashboard.skeletonCard}`}></div>
+                    <div className={`${dashboard.card} ${dashboard.skeleton} ${dashboard.skeletonCard}`}></div>
+                </div>
+
+                <div className={`${dashboard.skeleton} ${dashboard.skeletonChart}`}></div>
+
+                <div className={dashboard.casasContainer}>
+                    <div className={`${dashboard.casaCard} ${dashboard.skeleton} ${dashboard.skeletonCasa}`}></div>
+                    <div className={`${dashboard.casaCard} ${dashboard.skeleton} ${dashboard.skeletonCasa}`}></div>
+                    <div className={`${dashboard.casaCard} ${dashboard.skeleton} ${dashboard.skeletonCasa}`}></div>
+                    <div className={`${dashboard.casaCard} ${dashboard.skeleton} ${dashboard.skeletonCasa}`}></div>
+                </div>
+
+                <div className={dashboard.verTodosContainer}>
+                    <div className={`${dashboard.skeleton} ${dashboard.skeletonButton}`}></div>
+                    <div className={`${dashboard.skeleton} ${dashboard.skeletonButton}`}></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={dashboard.container}>
             <h1 className={dashboard.title}>Dashboard</h1>
 
-            {/* 🔴 SEM DADOS */}
             {!temBilhetes && (
                 <>
-                    {/* CARDS */}
                     <div className={dashboard.stats}>
                         <div className={dashboard.card}>
                             <h3>Ganhos</h3>
@@ -106,7 +135,6 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* EMPTY STATE */}
                     <div className={dashboard.emptyState}>
                         <div className={dashboard.icon}>📊</div>
                         <h2>Nenhum bilhete ainda</h2>
@@ -120,7 +148,6 @@ export default function Dashboard() {
                         </button>
                     </div>
 
-                    {/* DICAS */}
                     <div className={dashboard.tips}>
                         <h2>💡 Dicas para começar</h2>
                         <ul>
@@ -132,7 +159,6 @@ export default function Dashboard() {
                 </>
             )}
 
-            {/* 🟢 COM DADOS (SEU DASHBOARD ORIGINAL) */}
             {temBilhetes && (
                 <>
                     <GraficoPizza
@@ -160,7 +186,6 @@ export default function Dashboard() {
                 </>
             )}
 
-            {/* 🔵 BOTÕES (sempre visível) */}
             <div className={dashboard.verTodosContainer}>
                 <button
                     className={layout.buttonFilter}
