@@ -9,7 +9,7 @@ import ResumoVisual from "@/app/components/ResultadoGrafico";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
-export default function BilhetesContent({casa}) {
+export default function BilhetesContent({ casa }) {
   const [bilhetes, setBilhetes] = useState([]);
   const [nomeJogador, setNomeJogador] = useState("");
   const [dataFiltro, setDataFiltro] = useState("");
@@ -19,7 +19,7 @@ export default function BilhetesContent({casa}) {
   const [bilheteSelecionado, setBilheteSelecionado] = useState(null);
   const [statusFiltro, setStatusFiltro] = useState("");
   //const searchParams = useSearchParams();
- // const casa = searchParams.get("casa");
+  // const casa = searchParams.get("casa");
   const router = useRouter();
 
 
@@ -45,6 +45,20 @@ export default function BilhetesContent({casa}) {
       console.error(error);
       toast.error("Erro ao excluir bilhete");
       console.log(bilheteSelecionado);
+    }
+  }
+
+  async function excluirBilheteMobile(id) {
+    try {
+      await api.delete("/Bilhete", {
+        data: { id }
+      });
+
+      toast.success("Bilhete excluído!");
+      carregarBilhetes(paginaAtual, dataFiltro, statusFiltro);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao excluir bilhete");
     }
   }
 
@@ -420,10 +434,10 @@ export default function BilhetesContent({casa}) {
         <div className={table.mobileOnly}>
           {bilhetes.map((b) => (
             <div key={b.id} className={table.card}>
-              <p><strong>Usuário:</strong> {b.usuario}</p>
+              <p><strong>Usuário:</strong> {b.usuarioNome}</p>
               <p><strong>Odd:</strong> {b.odd}</p>
               <p><strong>Valor:</strong> R$ {b.valorApostado}</p>
-              <p><strong>Retorno:</strong> R$ {b.retorno}</p>
+              <p><strong>Retorno:</strong> R$ {b.valorRetornado}</p>
               <p><strong>Data:</strong> {b.dataAposta}</p>
               <p><strong>Status:</strong> {b.status}</p>
 
@@ -456,6 +470,15 @@ export default function BilhetesContent({casa}) {
                     ✓ Finalizado
                   </span>
                 )}
+              </div>
+
+              <div style={{ marginTop: "12px" }}>
+                <button
+                  className={table.buttonDanger}
+                  onClick={() => excluirBilheteMobile(b.id)}
+                >
+                  🗑 Excluir
+                </button>
               </div>
             </div>
           ))}
