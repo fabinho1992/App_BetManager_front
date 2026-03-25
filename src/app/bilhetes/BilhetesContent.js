@@ -18,6 +18,7 @@ export default function BilhetesContent({ casa }) {
   const [dashboard, setDashboard] = useState(null);
   const [bilheteSelecionado, setBilheteSelecionado] = useState(null);
   const [statusFiltro, setStatusFiltro] = useState("");
+  const [usuarioDados, setUsuarioDados] = useState(null);
   //const searchParams = useSearchParams();
   // const casa = searchParams.get("casa");
   const router = useRouter();
@@ -78,6 +79,17 @@ export default function BilhetesContent({ casa }) {
       }
 
       const res = await api.get(url);
+
+      const email = localStorage.getItem("email");
+      console.log("email do localStorage:", email);
+
+      const usuarioEmail = await api.get(`/usuario/email?email=${email}`);
+
+      console.log("resposta completa:", usuarioEmail);
+      console.log("dados da resposta:", usuarioEmail.data);
+      console.log("objeto do usuário:", usuarioEmail.data.data);
+
+      setUsuarioDados(usuarioEmail.data.data);
 
 
       setBilhetes(res.data.data);
@@ -198,8 +210,6 @@ export default function BilhetesContent({ casa }) {
   }
 
 
-
-  // ✅ useEffect agora só chama a função
   useEffect(() => {
 
     const token = localStorage.getItem("token");
