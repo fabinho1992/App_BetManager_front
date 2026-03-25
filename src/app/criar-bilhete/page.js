@@ -6,6 +6,7 @@ import api from "@/services/api";
 import form from "@/styles/form.module.css";
 import layout from "@/styles/layout.module.css";
 import toast from "react-hot-toast";
+import { atualizarBancaHeader } from "../hooks/atualizarBancaHeader";
 
 
 export default function CriarBilhete() {
@@ -58,6 +59,7 @@ export default function CriarBilhete() {
       });
 
       toast.success("Bilhete criado com sucesso!");
+      atualizarBancaHeader();
       router.push("/bilhetes");
 
     } catch (error) {

@@ -1,24 +1,51 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import api from "@/services/api";
 import styles from "@/styles/header.module.css";
 
 export default function Header() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [emailUser, setEmailUser] = useState("");
+  const [bancaAtual, setBancaAtual] = useState(null);
+  const [usuario, setUsuario] = useState(null);
+
+  const carregarUsuario = useCallback(async () => {
+    try {
+      const email = localStorage.getItem("email");
+      if (!email) return;
+
+      setEmailUser(email);
+
+      const response = await api.get(`/Usuario/email?email=${email}`);
+      setBancaAtual(response.data.data.bancaAtual);
+      setUsuario(response.data.data);
+    } catch (error) {
+      console.error("Erro ao carregar dados do usuário:", error.response?.data || error);
+    }
+  }, []);
 
   useEffect(() => {
-    const email = localStorage.getItem("email");
-    if (email) {
-      setEmailUser(email);
+    carregarUsuario();
+  }, [carregarUsuario]);
+
+  useEffect(() => {
+    function atualizarBancaNoHeader() {
+      carregarUsuario();
     }
-  }, []); 
+
+    window.addEventListener("bancaAtualizada", atualizarBancaNoHeader);
+
+    return () => {
+      window.removeEventListener("bancaAtualizada", atualizarBancaNoHeader);
+    };
+  }, [carregarUsuario]);
 
   function logout() {
     localStorage.removeItem("token");
-    localStorage.removeItem("email"); // opcional: remover o email também
+    localStorage.removeItem("email");
     router.push("/");
   }
 
@@ -35,18 +62,29 @@ export default function Header() {
 
           <h2 className={styles.logo}>App Bet</h2>
         </div>
+
+        <div className={styles.right}>
+          <div className={styles.bancaBox}>
+            <span className={styles.bancaLabel}>Banca</span>
+            <strong className={styles.bancaValue}>
+              {bancaAtual !== null
+                ? `R$ ${Number(bancaAtual).toFixed(2)}`
+                : "Carregando..."}
+            </strong>
+          </div>
+        </div>
       </header>
 
-      {/* MENU LATERAL */}
       <div className={`${styles.sidebar} ${menuOpen ? styles.open : ""}`}>
         <div className={styles.sidebarHeader}>
           <div className={styles.avatar}>👤</div>
           <div>
-            <strong>Usuário</strong>
-            <p>{emailUser || "Sem email"}</p> {/* Mostra o email aqui */}
+            <strong>{usuario?.displayName}</strong>
+            <p>{emailUser || "Sem email"}</p>
           </div>
         </div>
-        <button onClick={() => router.push("/perfil")}>
+
+        <button onClick={() => router.push("/editperfil")}>
           👤 Editar Perfil
         </button>
 
@@ -59,7 +97,6 @@ export default function Header() {
         </button>
       </div>
 
-      {/* OVERLAY (escurece fundo) */}
       {menuOpen && (
         <div
           className={styles.overlay}

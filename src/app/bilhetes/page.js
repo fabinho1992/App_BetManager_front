@@ -1,8 +1,9 @@
 import BilhetesContent from "./BilhetesContent";
 
-export default function BilhetesPage({ searchParams }) {
+export default async function BilhetesPage({ searchParams }) {
 
-  const casa = searchParams?.casa || null;
+  const params = await searchParams;
+  const casa = params?.casa || null;
 
   return <BilhetesContent casa={casa} />;
 }

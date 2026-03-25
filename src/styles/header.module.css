@@ -111,3 +111,29 @@
 .avatar {
   font-size: 24px;
 }
+
+.right {
+  display: flex;
+  align-items: center;
+}
+
+.bancaBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 8px 14px;
+  border-radius: 10px;
+}
+
+.bancaLabel {
+  font-size: 12px;
+  opacity: 0.8;
+  color:white;
+}
+
+.bancaValue {
+  font-size: 16px;
+  font-weight: bold;
+  color: #22c55e;
+}

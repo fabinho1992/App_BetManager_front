@@ -8,6 +8,7 @@ import table from "@/styles/table.module.css";
 import ResumoVisual from "@/app/components/ResultadoGrafico";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { atualizarBancaHeader } from "../hooks/atualizarBancaHeader";
 
 export default function BilhetesContent({ casa }) {
   const [bilhetes, setBilhetes] = useState([]);
@@ -137,6 +138,7 @@ export default function BilhetesContent({ casa }) {
         statusEnum: novoStatus
       });
 
+      atualizarBancaHeader();
       toast.success("Status atualizado com sucesso!");
 
       // recarrega lista
@@ -262,14 +264,7 @@ export default function BilhetesContent({ casa }) {
                 R$ {dashboard.lucro.toFixed(2)}
               </p>
             </div>
-
-            <div className={table.dashboardCard}>
-              <p className={table.dashboardTitle}>Resultado</p>
-              <p className={`${table.dashboardValue} ${dashboard.resultadoFinal >= 0 ? table.positive : table.negative}`}>
-                R$ {dashboard.resultadoFinal.toFixed(2)}
-              </p>
-            </div>
-
+            
             <div className={table.dashboardCard}>
               <p className={table.dashboardTitle}>ROI</p>
               <p className={`${table.dashboardValue} ${dashboard.resultadoFinal >= 0 ? table.positive : table.negative}`}>
