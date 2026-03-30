@@ -154,6 +154,23 @@
   border-radius: 12px;
 }
 
+.hideOnMobile {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .hideOnMobile {
+    display: none;
+  }
+
+  .stats {
+    display: flex;
+    justify-content: center;
+  }
+
+
+}
+
 @keyframes shimmer {
   0% {
     background-position: 200% 0;

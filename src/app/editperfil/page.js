@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import api from "@/services/api";
 import styles from "@/styles/perfil.module.css";
+import { atualizarBancaHeader } from "../hooks/atualizarBancaHeader";
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -79,6 +80,9 @@ export default function PerfilPage() {
       localStorage.setItem("email", usuario.email);
 
       toast.success("Perfil atualizado com sucesso!");
+      atualizarBancaHeader();
+      
+      router.push("/dashboard");
     } catch (error) {
       console.error(error.response?.data || error);
       toast.error("Erro ao atualizar perfil");
@@ -101,6 +105,14 @@ export default function PerfilPage() {
   return (
     <main className={styles.container}>
       <div className={styles.card}>
+      <div className={styles.headerTop}>
+          <button
+            className={styles.buttonBack}
+            onClick={() => router.push("/dashboard")}
+          >
+            ← Voltar
+          </button>
+        </div>
         <h1 className={styles.title}>Meu Perfil</h1>
         <p className={styles.subtitle}>
           Visualize seus dados e edite apenas as informações permitidas.

@@ -1,49 +1,73 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
 import styles from "@/styles/header.module.css";
+import toast from "react-hot-toast";
 
 export default function Header() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [emailUser, setEmailUser] = useState("");
-  const [bancaAtual, setBancaAtual] = useState(null);
   const [usuario, setUsuario] = useState(null);
 
-  const carregarUsuario = useCallback(async () => {
+  async function buscarUsuario() {
     try {
       const email = localStorage.getItem("email");
       if (!email) return;
 
-      setEmailUser(email);
-
       const response = await api.get(`/Usuario/email?email=${email}`);
-      setBancaAtual(response.data.data.bancaAtual);
       setUsuario(response.data.data);
     } catch (error) {
-      console.error("Erro ao carregar dados do usuário:", error.response?.data || error);
+      console.error(
+        "Erro ao carregar dados do usuário:",
+        error.response?.data || error
+      );
     }
-  }, []);
+  }
 
   useEffect(() => {
-    carregarUsuario();
-  }, [carregarUsuario]);
+    let ativo = true;
 
-  useEffect(() => {
+    async function carregar() {
+      try {
+        const email = localStorage.getItem("email");
+        if (!email) return;
+
+        const response = await api.get(`/Usuario/email?email=${email}`);
+
+        if (ativo) {
+          setUsuario(response.data.data);
+        }
+      } catch (error) {
+        console.error(
+          "Erro ao carregar dados do usuário:",
+          error.response?.data || error
+        );
+      }
+    }
+
+    carregar();
+
     function atualizarBancaNoHeader() {
-      carregarUsuario();
+      buscarUsuario();
     }
 
     window.addEventListener("bancaAtualizada", atualizarBancaNoHeader);
 
     return () => {
+      ativo = false;
       window.removeEventListener("bancaAtualizada", atualizarBancaNoHeader);
     };
-  }, [carregarUsuario]);
+  }, []);
+
+  function navegarPara(rota) {
+    setMenuOpen(false);
+    router.push(rota);
+  }
 
   function logout() {
+    setMenuOpen(false);
     localStorage.removeItem("token");
     localStorage.removeItem("email");
     router.push("/");
@@ -67,8 +91,8 @@ export default function Header() {
           <div className={styles.bancaBox}>
             <span className={styles.bancaLabel}>Banca</span>
             <strong className={styles.bancaValue}>
-              {bancaAtual !== null
-                ? `R$ ${Number(bancaAtual).toFixed(2)}`
+              {usuario?.bancaAtual !== undefined && usuario?.bancaAtual !== null
+                ? `R$ ${Number(usuario.bancaAtual).toFixed(2)}`
                 : "Carregando..."}
             </strong>
           </div>
@@ -79,16 +103,16 @@ export default function Header() {
         <div className={styles.sidebarHeader}>
           <div className={styles.avatar}>👤</div>
           <div>
-            <strong>{usuario?.displayName}</strong>
-            <p>{emailUser || "Sem email"}</p>
+            <strong>{usuario?.displayName || "Usuário"}</strong>
+            <p>{usuario?.email || "Sem email"}</p>
           </div>
         </div>
 
-        <button onClick={() => router.push("/editperfil")}>
+        <button onClick={() => navegarPara("/editperfil")}>
           👤 Editar Perfil
         </button>
 
-        <button onClick={() => router.push("/redefinir-senha")}>
+        <button onClick={() => navegarPara("/redefinir-senha")}>
           🔒 Redefinir Senha
         </button>
 

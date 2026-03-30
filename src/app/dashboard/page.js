@@ -119,12 +119,12 @@ export default function Dashboard() {
             {!temBilhetes && (
                 <>
                     <div className={dashboard.stats}>
-                        <div className={dashboard.card}>
+                        <div className={`${dashboard.card} ${dashboard.hideOnMobile}`}>
                             <h3>Ganhos</h3>
                             <p>0</p>
                         </div>
 
-                        <div className={dashboard.card}>
+                        <div className={`${dashboard.card} ${dashboard.hideOnMobile}`}>
                             <h3>Perdidas</h3>
                             <p>0</p>
                         </div>

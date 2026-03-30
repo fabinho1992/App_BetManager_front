@@ -129,6 +129,30 @@
   background: #475569;
 }
 
+.headerTop {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.buttonBack {
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.buttonBack:hover {
+  background: #334155;
+  transform: translateX(-3px);
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 95px 14px 20px;
