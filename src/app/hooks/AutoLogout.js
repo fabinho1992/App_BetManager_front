@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { toast } from "react-hot-toast";
 
-const TEMPO_INATIVIDADE = 10 * 60 * 1000;
+const TEMPO_INATIVIDADE = 30 * 60 * 1000;
 
 export default function AutoLogout() {
 

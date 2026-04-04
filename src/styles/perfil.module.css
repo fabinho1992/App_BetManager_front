@@ -153,6 +153,27 @@
   transform: translateX(-3px);
 }
 
+.formGroup select,
+.formGroupFull select,
+.select {
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #fff;
+  padding: 0 14px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.formGroup select:focus,
+.formGroupFull select:focus,
+.select:focus {
+  border-color: #22c55e;
+  transform: scale(1.01);
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 95px 14px 20px;

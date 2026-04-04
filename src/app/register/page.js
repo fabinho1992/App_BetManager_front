@@ -13,6 +13,7 @@ export default function Register() {
     displayName: "",
     cpf: "",
     email: "",
+    casaPreferida: "",
     bancaInicial: "",
     metaBanca: "",
     password: ""
@@ -142,6 +143,7 @@ export default function Register() {
         displayName: formData.displayName,
         cpf: formData.cpf.replace(/\D/g, ""), // envia só números
         email: formData.email,
+        casaPreferida: formData.casaPreferida,
         bancaInicial: parseCurrency(formData.bancaInicial),
         metaBanca: parseCurrency(formData.metaBanca),
         password: formData.password
@@ -300,17 +302,30 @@ export default function Register() {
           <input
             className={form.input}
             name="bancaInicial"
-            placeholder="R$ 0,00"
+            placeholder="Banca inicial"
             value={formData.bancaInicial || ""}
             onChange={handleChange}
           />
+          
           <input
             className={form.input}
             name="metaBanca"
-            placeholder="R$ 0,00"
+            placeholder="Meta de banca"
             value={formData.metaBanca || ""}
             onChange={handleChange}
           />
+          <select
+                name="casaPreferida"
+                value={formData.casaPreferida}
+                onChange={handleChange}
+                className={form.select}
+              >
+            <option value="">Selecione a casa</option>
+                <option value="Betano">Betano</option>
+                <option value="Bet365">Bet365</option>
+                <option value="SuperBet">SuperBet</option>
+                <option value="SportingBet">SportingBet</option>
+          </select>
           <input
             className={form.input}
             type="password"

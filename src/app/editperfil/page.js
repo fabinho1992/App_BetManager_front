@@ -17,6 +17,7 @@ export default function PerfilPage() {
     displayName: "",
     cpf: "",
     email: "",
+    casaPreferida: "",
     bancaInicial: "",
     bancaAtual: "",
     metaBanca: "",
@@ -34,13 +35,14 @@ export default function PerfilPage() {
           return;
         }
 
-        const response = await api.get(`/Usuario/email?email=${email}`);
+        const response = await api.get(`/Usuario/email`);
         const dados = response.data.data;
 
         setUsuario({
           displayName: dados.displayName || "",
           cpf: dados.cpf || "",
           email: dados.email || "",
+          casaPreferida: dados.casaPreferida || "",
           bancaInicial: dados.bancaInicial ?? "",
           bancaAtual: dados.bancaAtual ?? "",
           metaBanca: dados.metaBanca ?? "",
@@ -74,7 +76,8 @@ export default function PerfilPage() {
         displayName: usuario.displayName,
         email: usuario.email,
         bancaInicial: Number(usuario.bancaInicial),
-        metaBanca: Number(usuario.metaBanca)
+        metaBanca: Number(usuario.metaBanca),
+        casaPreferida: usuario.casaPreferida
       });
 
       localStorage.setItem("email", usuario.email);
@@ -170,6 +173,22 @@ export default function PerfilPage() {
                 value={usuario.metaBanca}
                 onChange={handleChange}
               />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Casa Preferida</label>
+              <select
+                name="casaPreferida"
+                value={usuario.casaPreferida}
+                onChange={handleChange}
+                className={styles.select}
+              >
+                <option value="">Selecione a casa</option>
+                <option value="Betano">Betano</option>
+                <option value="Bet365">Bet365</option>
+                <option value="SuperBet">SuperBet</option>
+                <option value="SportingBet">SportingBet</option>
+              </select>
             </div>
 
             <div className={styles.formGroupFull}>
