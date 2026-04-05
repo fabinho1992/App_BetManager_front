@@ -225,22 +225,6 @@ export default function Dashboard() {
         {mercadoSelecionado ? `Dashboard - ${mercadoSelecionado}` : "Dashboard"}
       </h1>
 
-      <div className={dashboard.filtroMercadoContainer}>
-        <select
-          value={mercadoSelecionado}
-          onChange={(e) => alterarMercado(e.target.value)}
-          className={dashboard.selectMercado}
-          disabled={loadingAtualizacao || acaoBotao !== ""}
-        >
-          <option value="">Todos os mercados</option>
-          <option value="Escanteios">Escanteios</option>
-          <option value="Gols">Gols</option>
-          <option value="Cartoes">Cartões</option>
-          <option value="AmbasMarcam">Ambas Marcam</option>
-          <option value="ResultadoFinal">Resultado Final</option>
-        </select>
-      </div>
-
       {loadingAtualizacao && (
         <div
           style={{
@@ -310,6 +294,22 @@ export default function Dashboard() {
             </div>
           </>
         )}
+
+        <div className={dashboard.filtroMercadoContainer}>
+          <select
+            value={mercadoSelecionado}
+            onChange={(e) => alterarMercado(e.target.value)}
+            className={dashboard.selectMercado}
+            disabled={loadingAtualizacao || acaoBotao !== ""}
+          >
+            <option value="">Todos os mercados</option>
+            <option value="Escanteios">Escanteios</option>
+            <option value="Gols">Gols</option>
+            <option value="Cartoes">Cartões</option>
+            <option value="AmbasMarcam">Ambas Marcam</option>
+            <option value="ResultadoFinal">Resultado Final</option>
+          </select>
+        </div>
 
         {temBilhetes && (
           <div className={dashboard.conteudoCentral}>

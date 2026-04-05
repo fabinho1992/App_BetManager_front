@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import api from "@/services/api";
 import styles from "@/styles/header.module.css";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 export default function Header() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function Header() {
     } catch (error) {
       console.error(
         "Erro ao carregar dados do usuário:",
-        error.response?.data || error
+        error.response?.data || error,
       );
     }
   }
@@ -42,7 +43,7 @@ export default function Header() {
       } catch (error) {
         console.error(
           "Erro ao carregar dados do usuário:",
-          error.response?.data || error
+          error.response?.data || error,
         );
       }
     }
@@ -83,9 +84,18 @@ export default function Header() {
           >
             ☰
           </button>
-
-          <h2 className={styles.logo}>App Bet</h2>
+          
         </div>
+        <div className={styles.logoWrapper}>
+            <Image
+              src="/BetVision-Logo.png"
+              alt="BetVision"
+              width={200}
+              height={50}
+              className={styles.logoImage}
+              priority
+            />
+          </div>
 
         <div className={styles.right}>
           <div className={styles.bancaBox}>
@@ -112,20 +122,15 @@ export default function Header() {
           👤 Editar Perfil
         </button>
 
-        <button onClick={() => navegarPara("/redefinir-senha")}>
+        <button onClick={() => navegarPara("/resetsenha")}>
           🔒 Redefinir Senha
         </button>
 
-        <button onClick={logout}>
-          🚪 Sair
-        </button>
+        <button onClick={logout}>🚪 Sair</button>
       </div>
 
       {menuOpen && (
-        <div
-          className={styles.overlay}
-          onClick={() => setMenuOpen(false)}
-        />
+        <div className={styles.overlay} onClick={() => setMenuOpen(false)} />
       )}
     </>
   );

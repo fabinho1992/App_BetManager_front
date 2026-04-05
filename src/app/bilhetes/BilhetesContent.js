@@ -18,7 +18,8 @@ export default function BilhetesContent({ casa }) {
   const [bilheteSelecionado, setBilheteSelecionado] = useState(null);
   const [statusFiltro, setStatusFiltro] = useState("");
   const [usuarioDados, setUsuarioDados] = useState(null);
-
+  const [loadingPdfPagina, setLoadingPdfPagina] = useState(false);
+  const [loadingPdfTodos, setLoadingPdfTodos] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
   const [loadingTabela, setLoadingTabela] = useState(false);
   const [actionLoading, setActionLoading] = useState("");
@@ -29,6 +30,76 @@ export default function BilhetesContent({ casa }) {
 
   function isActionLoading(actionName) {
     return actionLoading === actionName;
+  }
+
+  // Função para PDF
+  async function baixarRelatorioPdf(somentePaginaAtual = true) {
+    try {
+      if (somentePaginaAtual) {
+        setLoadingPdfPagina(true);
+      } else {
+        setLoadingPdfTodos(true);
+      }
+
+      const mercado = searchParams.get("mercado");
+      const params = new URLSearchParams();
+
+      if (casa && casa !== "todas") {
+        params.set("casaAposta", casa);
+      }
+
+      if (mercado) {
+        params.set("mercado", mercado);
+      }
+
+      if (statusFiltro) {
+        params.set("status", statusFiltro);
+      }
+
+      if (dataFiltro) {
+        params.set("data", dataFiltro);
+      }
+
+      params.set("pageNumber", paginaAtual.toString());
+      params.set("pageSize", "5");
+      params.set("somentePaginaAtual", somentePaginaAtual.toString());
+
+      const response = await api.get(
+        `/Bilhete/usuario/bilhetes-relatorio-pdf?${params.toString()}`,
+        {
+          responseType: "blob",
+        },
+      );
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+
+      const nomeArquivo = somentePaginaAtual
+        ? `relatorio-bilhetes-pagina-${paginaAtual}.pdf`
+        : "relatorio-bilhetes-filtrados.pdf";
+
+      link.setAttribute("download", nomeArquivo);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+
+      toast.success(
+        somentePaginaAtual
+          ? "PDF da página atual gerado com sucesso!"
+          : "PDF de todos os bilhetes filtrados gerado com sucesso!",
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao gerar relatório em PDF.");
+    } finally {
+      setLoadingPdfPagina(false);
+      setLoadingPdfTodos(false);
+    }
   }
 
   function formatarDataHora(data) {
@@ -59,7 +130,7 @@ export default function BilhetesContent({ casa }) {
 
       const mercado = searchParams.get("mercado");
 
-      let url = `/Bilhete/usuario/bilhetes-filtrados?pageNumber=${pagina}&pageSize=5`;
+      let url = `/Bilhete/usuario/bilhetes-filtrados?pageNumber=${pagina}&pageSize=10`;
 
       if (casa && casa !== "todas") {
         url += `&casaAposta=${encodeURIComponent(casa)}`;
@@ -353,7 +424,6 @@ export default function BilhetesContent({ casa }) {
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <button
             className={layout.buttonPrimary}
-            disabled={loadingTabela || actionLoading !== ""}
             onClick={() =>
               router.push(
                 `/criar-bilhete${
@@ -363,6 +433,7 @@ export default function BilhetesContent({ casa }) {
                 }`,
               )
             }
+            disabled={loadingTabela || actionLoading !== ""}
           >
             + Criar Bilhete
           </button>
@@ -379,6 +450,32 @@ export default function BilhetesContent({ casa }) {
             {isActionLoading("excluirSelecionado")
               ? "Excluindo..."
               : "🗑 Excluir Bilhete"}
+          </button>
+
+          <button
+            className={layout.buttonFilter}
+            onClick={() => baixarRelatorioPdf(true)}
+            disabled={
+              loadingTabela ||
+              actionLoading !== "" ||
+              loadingPdfPagina ||
+              bilhetes.length === 0
+            }
+          >
+            {loadingPdfPagina ? "Gerando PDF..." : "📄 PDF da página"}
+          </button>
+
+          <button
+            className={layout.buttonPrimary}
+            onClick={() => baixarRelatorioPdf(false)}
+            disabled={
+              loadingTabela ||
+              actionLoading !== "" ||
+              loadingPdfTodos ||
+              bilhetes.length === 0
+            }
+          >
+            {loadingPdfTodos ? "Gerando PDF..." : "📑 PDF de todos filtrados"}
           </button>
         </div>
 
@@ -637,7 +734,9 @@ export default function BilhetesContent({ casa }) {
 
           <div className={table.pagination}>
             <button
-              disabled={paginaAtual === 1 || loadingTabela || actionLoading !== ""}
+              disabled={
+                paginaAtual === 1 || loadingTabela || actionLoading !== ""
+              }
               onClick={() =>
                 carregarBilhetes(paginaAtual - 1, dataFiltro, statusFiltro)
               }
