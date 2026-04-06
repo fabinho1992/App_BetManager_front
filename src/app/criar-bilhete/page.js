@@ -15,6 +15,7 @@ export default function CriarBilhete() {
   const [statusAposta, setStatusAposta] = useState(null);
   const [mercadoAposta, setMercadoAposta] = useState(null);
   const [casaAposta, setCasaAposta] = useState("");
+  const [dataAposta, setDataAposta] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingUsuario, setLoadingUsuario] = useState(true);
 
@@ -96,15 +97,22 @@ export default function CriarBilhete() {
         return;
       }
 
-      await api.post("/bilhete", {
-        odd: Number(odd),
-        valorApostado: parseCurrency(valorApostado),
-        tipoBanca: oddEhSeguraAutomatica ? 1 : tipoAposta,
-        statusEnum: statusAposta,
-        casaAposta: casaAposta,
-        mercado: mercadoAposta
-      });
+      const payload = {
+  odd: Number(odd),
+  valorApostado: parseCurrency(valorApostado),
+  tipoBanca: oddEhSeguraAutomatica ? 1 : tipoAposta,
+  statusEnum: statusAposta,
+  casaAposta: casaAposta,
+  mercado: mercadoAposta,
+  dataAposta: dataAposta ? new Date(dataAposta).toISOString() : null,
+};
 
+console.log("dataAposta state:", dataAposta);
+console.log("payload enviado:", payload);
+
+await api.post("/bilhete", payload);
+
+      
       toast.success("Bilhete criado com sucesso!");
       atualizarBancaHeader();
       router.push("/bilhetes");
@@ -210,6 +218,13 @@ export default function CriarBilhete() {
             <option value="2">Perdida</option>
             <option value="3">Cancelada</option>
           </select>
+
+          <input
+            className={form.input}
+            type="datetime-local"
+            value={dataAposta}
+            onChange={(e) => setDataAposta(e.target.value)}
+          />
 
           <button className={form.button} disabled={loading || loadingUsuario}>
             {loading ? "⏳ Criando..." : "Criar"}

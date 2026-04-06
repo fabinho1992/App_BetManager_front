@@ -24,6 +24,11 @@ export default function BilhetesContent({ casa }) {
   const [loadingTabela, setLoadingTabela] = useState(false);
   const [actionLoading, setActionLoading] = useState("");
 
+  const [modalEditarOpen, setModalEditarOpen] = useState(false);
+  const [bilheteEditando, setBilheteEditando] = useState(null);
+  const [novoValorRetornado, setNovoValorRetornado] = useState("");
+  const [salvandoResultado, setSalvandoResultado] = useState(false);
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const mercadoSelecionado = searchParams.get("mercado") || "";
@@ -32,7 +37,88 @@ export default function BilhetesContent({ casa }) {
     return actionLoading === actionName;
   }
 
-  // Função para PDF
+  function formatCurrency(value) {
+    value = value.replace(/\D/g, "");
+    const number = Number(value) / 100;
+
+    return number.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  }
+
+  function parseCurrency(value) {
+    if (!value) return 0;
+    return Number(value.replace(/\D/g, "")) / 100;
+  }
+
+  function formatarDataHora(data) {
+    if (!data) return "";
+
+    return new Date(data).toLocaleString("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function abrirModalEditarResultado(bilhete) {
+    setBilheteEditando(bilhete);
+    setNovoValorRetornado(
+      Number(bilhete.valorRetornado || 0).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }),
+    );
+    setModalEditarOpen(true);
+  }
+
+  function fecharModalEditarResultado() {
+    setModalEditarOpen(false);
+    setBilheteEditando(null);
+    setNovoValorRetornado("");
+  }
+
+  async function salvarNovoResultado() {
+    if (!bilheteEditando) {
+      toast.error("Nenhum bilhete selecionado.");
+      return;
+    }
+
+    try {
+      const valorConvertido = parseCurrency(novoValorRetornado);
+
+      if (Number.isNaN(valorConvertido) || valorConvertido < 0) {
+        toast.error("Informe um valor válido.");
+        return;
+      }
+
+      setSalvandoResultado(true);
+
+      await api.put("/Bilhete/resultado", {
+        bilheteId: bilheteEditando.id,
+        novoValorRetornado: valorConvertido,
+      });
+
+      toast.success("Resultado do bilhete atualizado com sucesso!");
+      atualizarBancaHeader();
+      fecharModalEditarResultado();
+      await carregarBilhetes(paginaAtual, dataFiltro, statusFiltro);
+    } catch (error) {
+      console.error(error.response?.data || error);
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data ||
+          "Erro ao atualizar resultado do bilhete.",
+      );
+    } finally {
+      setSalvandoResultado(false);
+    }
+  }
+
   async function baixarRelatorioPdf(somentePaginaAtual = true) {
     try {
       if (somentePaginaAtual) {
@@ -100,19 +186,6 @@ export default function BilhetesContent({ casa }) {
       setLoadingPdfPagina(false);
       setLoadingPdfTodos(false);
     }
-  }
-
-  function formatarDataHora(data) {
-    if (!data) return "";
-
-    return new Date(data).toLocaleString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   }
 
   async function carregarBilhetes(
@@ -492,51 +565,65 @@ export default function BilhetesContent({ casa }) {
         </div>
 
         <div className={table.filtrosContainer}>
-          <input
-            type="date"
-            value={dataFiltro}
-            onChange={(e) => setDataFiltro(e.target.value)}
-            className={table.input}
-            disabled={loadingTabela || actionLoading !== ""}
-          />
+          <div className={table.campoFiltro}>
+            <label htmlFor="dataFiltro" className={table.labelFiltro}>
+              Filtrar por data
+            </label>
+            <input
+              id="dataFiltro"
+              type="date"
+              value={dataFiltro}
+              onChange={(e) => setDataFiltro(e.target.value)}
+              className={table.input}
+              disabled={loadingTabela || actionLoading !== ""}
+            />
+          </div>
 
-          <select
-            value={statusFiltro}
-            onChange={(e) => setStatusFiltro(e.target.value)}
-            className={table.input}
-            disabled={loadingTabela || actionLoading !== ""}
-          >
-            <option value="">Todos os status</option>
-            <option value="Pendente">Pendente</option>
-            <option value="Ganha">Ganha</option>
-            <option value="Perdida">Perdida</option>
-            <option value="Cancelado">Cancelado</option>
-          </select>
+          <div className={table.campoFiltro}>
+            <label htmlFor="statusFiltro" className={table.labelFiltro}>
+              Filtrar por status
+            </label>
+            <select
+              id="statusFiltro"
+              value={statusFiltro}
+              onChange={(e) => setStatusFiltro(e.target.value)}
+              className={table.input}
+              disabled={loadingTabela || actionLoading !== ""}
+            >
+              <option value="">Todos os status</option>
+              <option value="Pendente">Pendente</option>
+              <option value="Ganha">Ganha</option>
+              <option value="Perdida">Perdida</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
+          </div>
 
-          <button
-            className={layout.buttonFilter}
-            onClick={() => carregarBilhetes(1, dataFiltro, statusFiltro)}
-            disabled={loadingTabela || actionLoading !== ""}
-          >
-            {loadingTabela ? "Filtrando..." : "Filtrar"}
-          </button>
+          <div className={table.botoesFiltro}>
+            <button
+              className={layout.buttonFilter}
+              onClick={() => carregarBilhetes(1, dataFiltro, statusFiltro)}
+              disabled={loadingTabela || actionLoading !== ""}
+            >
+              {loadingTabela ? "Filtrando..." : "Filtrar"}
+            </button>
 
-          <button
-            className={layout.buttonClear}
-            disabled={loadingTabela || actionLoading !== ""}
-            onClick={() => {
-              setDataFiltro("");
-              setStatusFiltro("");
+            <button
+              className={layout.buttonClear}
+              disabled={loadingTabela || actionLoading !== ""}
+              onClick={() => {
+                setDataFiltro("");
+                setStatusFiltro("");
 
-              const params = new URLSearchParams(searchParams.toString());
+                const params = new URLSearchParams(searchParams.toString());
 
-              router.push(
-                `/bilhetes${params.toString() ? `?${params.toString()}` : ""}`,
-              );
-            }}
-          >
-            Limpar
-          </button>
+                router.push(
+                  `/bilhetes${params.toString() ? `?${params.toString()}` : ""}`,
+                );
+              }}
+            >
+              Limpar
+            </button>
+          </div>
         </div>
 
         {loadingTabela && (
@@ -648,9 +735,25 @@ export default function BilhetesContent({ casa }) {
                             </button>
                           </div>
                         ) : (
-                          <span className={table.badgeFinalizado}>
-                            ✓ Finalizado
-                          </span>
+                          <div className={table.finalizadoContainer}>
+                            <span className={table.badgeFinalizado}>
+                              ✓ Finalizado
+                            </span>
+
+                            {b.status === "Ganha" && (
+                              <button
+                                className={table.buttonEditResult}
+                                disabled={actionLoading !== ""}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  abrirModalEditarResultado(b);
+                                }}
+                              >
+                                <span className={table.buttonIcon}>✏️</span>
+                                <span>Editar</span>
+                              </button>
+                            )}
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -713,7 +816,25 @@ export default function BilhetesContent({ casa }) {
                       </button>
                     </>
                   ) : (
-                    <span className={table.badgeFinalizado}>✓ Finalizado</span>
+                    <div className={table.finalizadoContainer}>
+                      <span className={table.badgeFinalizado}>
+                        ✓ Finalizado
+                      </span>
+
+                      {b.status === "Ganha" && (
+                        <button
+                          className={table.buttonEditResult}
+                          disabled={actionLoading !== ""}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            abrirModalEditarResultado(b);
+                          }}
+                        >
+                          <span className={table.buttonIcon}>✏️</span>
+                          <span>Editar</span>
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -763,6 +884,66 @@ export default function BilhetesContent({ casa }) {
           </div>
         </div>
       </div>
+
+      {modalEditarOpen && (
+        <div className={table.modalOverlay}>
+          <div className={table.modalContent}>
+            <h3 className={table.modalTitle}>Editar resultado do bilhete</h3>
+
+            <p>
+              <strong>Usuário:</strong> {bilheteEditando?.usuarioNome}
+            </p>
+
+            <p>
+              <strong>Mercado:</strong> {bilheteEditando?.mercado}
+            </p>
+
+            <p>
+              <strong>Valor apostado:</strong> R${" "}
+              {bilheteEditando?.valorApostado}
+            </p>
+
+            <p>
+              <strong>Valor retornado atual:</strong> R${" "}
+              {bilheteEditando?.valorRetornado}
+            </p>
+
+            <div className={table.modalField}>
+              <label htmlFor="novoResultado">Novo valor retornado</label>
+              <input
+                id="novoResultado"
+                type="text"
+                className={table.input}
+                value={novoValorRetornado}
+                onChange={(e) =>
+                  setNovoValorRetornado(formatCurrency(e.target.value))
+                }
+                placeholder="R$ 0,00"
+              />
+            </div>
+
+            <div className={table.modalActions}>
+              <button
+                type="button"
+                className={layout.buttonClear}
+                onClick={fecharModalEditarResultado}
+                disabled={salvandoResultado}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className={layout.buttonFilter}
+                onClick={salvarNovoResultado}
+                disabled={salvandoResultado}
+              >
+                {salvandoResultado ? "Salvando..." : "Salvar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

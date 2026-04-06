@@ -28,17 +28,17 @@ export default function LoginPage() {
     try {
       const response = await api.post("/Auth/login", {
         email,
-        password
+        password,
       });
 
       localStorage.setItem("email", email);
       localStorage.setItem("token", response.data.data.token);
       console.log(response.data);
       router.push("/dashboard");
-
-    } catch(error) {
-      console.log(error);
-      console.log(error.response);
+    } catch (error) {
+      console.error("Erro completo:", error);
+      console.error("Status:", error.response?.status);
+      console.error("Data do erro:", error.response?.data);
       toast.error("email ou senha incorretos!");
     } finally {
       setLoading(false);
@@ -46,14 +46,12 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-
     const motivo = localStorage.getItem("logoutReason");
 
     if (motivo === "inatividade") {
       toast.error("Sessão encerrada por inatividade");
       localStorage.removeItem("logoutReason");
     }
-
   }, []);
 
   return (
@@ -67,7 +65,7 @@ export default function LoginPage() {
             type="email"
             placeholder="Email"
             required
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
 
           <input
@@ -75,7 +73,7 @@ export default function LoginPage() {
             type="password"
             placeholder="Senha"
             required
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
 
           <button className={form.button} disabled={loading}>
@@ -97,9 +95,10 @@ export default function LoginPage() {
             onClick={() => navegarPara("/resetsenha")}
             disabled={loadingPage === "/resetsenha"}
           >
-            {loadingPage === "/resetsenha" ? "⏳ Abrindo..." : "Recuperar senha"}
+            {loadingPage === "/resetsenha"
+              ? "⏳ Abrindo..."
+              : "Recuperar senha"}
           </button>
-
         </div>
       </div>
     </div>
