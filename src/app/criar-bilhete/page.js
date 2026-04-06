@@ -184,6 +184,7 @@ await api.post("/bilhete", payload);
             <option value="2">Cartões</option>
             <option value="3">Ambas Marcam</option>
             <option value="4">Resultado Final</option>
+            <option value="5">Basquete</option>
           </select>
 
           {!oddEhSeguraAutomatica && (

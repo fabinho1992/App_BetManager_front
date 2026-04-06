@@ -308,6 +308,7 @@ export default function Dashboard() {
             <option value="Cartoes">Cartões</option>
             <option value="AmbasMarcam">Ambas Marcam</option>
             <option value="ResultadoFinal">Resultado Final</option>
+            <option value="Basquete">Basquete</option>
           </select>
         </div>
 
