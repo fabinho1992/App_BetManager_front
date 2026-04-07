@@ -19,6 +19,12 @@ export default function CriarBilhete() {
   const [loading, setLoading] = useState(false);
   const [loadingUsuario, setLoadingUsuario] = useState(true);
 
+  const [mostrarCalculadoraOdd, setMostrarCalculadoraOdd] = useState(false);
+  const [oddMultiplaInput, setOddMultiplaInput] = useState("");
+  const [oddsMultipla, setOddsMultipla] = useState([]);
+  const [oddCalculada, setOddCalculada] = useState(null);
+  const [loadingOdd, setLoadingOdd] = useState(false);
+
   const router = useRouter();
 
   const oddNumber = Number(odd);
@@ -39,6 +45,54 @@ export default function CriarBilhete() {
     return Number(value.replace(/\D/g, "")) / 100;
   }
 
+  function adicionarOddMultipla() {
+    const valor = Number(oddMultiplaInput.replace(",", "."));
+
+    if (!valor || valor <= 1) {
+      toast.error("Informe uma odd válida maior que 1.");
+      return;
+    }
+
+    setOddsMultipla((prev) => [...prev, valor]);
+    setOddMultiplaInput("");
+  }
+
+  function removerOddMultipla(index) {
+    setOddsMultipla((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function calcularOddMultipla() {
+    if (oddsMultipla.length === 0) {
+      toast.error("Adicione ao menos uma odd.");
+      return;
+    }
+
+    try {
+      setLoadingOdd(true);
+
+      const response = await api.post("/Bilhete/calcular-odd", {
+        odds: oddsMultipla,
+      });
+
+      const oddFinal = response.data.data.oddFinal;
+
+      setOddCalculada(oddFinal);
+      setOdd(String(oddFinal));
+      toast.success("Odd calculada com sucesso!");
+    } catch (error) {
+      console.error(error.response?.data || error);
+      toast.error("Erro ao calcular odd.");
+    } finally {
+      setLoadingOdd(false);
+    }
+  }
+
+  function limparOddsMultipla() {
+    setOddsMultipla([]);
+    setOddMultiplaInput("");
+    setOddCalculada(null);
+  }
+
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -52,11 +106,10 @@ export default function CriarBilhete() {
         const email = localStorage.getItem("email");
         if (!email) return;
 
-        const response = await api.get(`/Usuario/email`);
+        const response = await api.get("/Usuario/email");
         const usuario = response.data.data;
 
         const casaPreferidaNome = usuario?.casaPreferida;
-        console.log(usuario);
         if (casaPreferidaNome) {
           setCasaAposta(casaPreferidaNome);
         }
@@ -87,7 +140,13 @@ export default function CriarBilhete() {
     try {
       setLoading(true);
 
-      if (!odd || !valorApostado || statusAposta === null || !casaAposta) {
+      if (
+        !odd ||
+        !valorApostado ||
+        statusAposta === null ||
+        !casaAposta ||
+        mercadoAposta === null
+      ) {
         toast.error("Preencha todos os campos");
         return;
       }
@@ -98,21 +157,17 @@ export default function CriarBilhete() {
       }
 
       const payload = {
-  odd: Number(odd),
-  valorApostado: parseCurrency(valorApostado),
-  tipoBanca: oddEhSeguraAutomatica ? 1 : tipoAposta,
-  statusEnum: statusAposta,
-  casaAposta: casaAposta,
-  mercado: mercadoAposta,
-  dataAposta: dataAposta ? new Date(dataAposta).toISOString() : null,
-};
+        odd: Number(odd),
+        valorApostado: parseCurrency(valorApostado),
+        tipoBanca: oddEhSeguraAutomatica ? 1 : tipoAposta,
+        statusEnum: statusAposta,
+        casaAposta: casaAposta,
+        mercado: mercadoAposta,
+        dataAposta: dataAposta ? new Date(dataAposta).toISOString() : null,
+      };
 
-console.log("dataAposta state:", dataAposta);
-console.log("payload enviado:", payload);
+      await api.post("/bilhete", payload);
 
-await api.post("/bilhete", payload);
-
-      
       toast.success("Bilhete criado com sucesso!");
       atualizarBancaHeader();
       router.push("/bilhetes");
@@ -136,9 +191,90 @@ await api.post("/bilhete", payload);
             ← Voltar
           </button>
         </div>
+
         <h1>Novo Bilhete</h1>
 
         <form className={form.form} onSubmit={handleSubmit}>
+          <div className={form.calculatorToggleWrapper}>
+            <button
+              type="button"
+              className={form.calculatorToggleButton}
+              onClick={() => setMostrarCalculadoraOdd((prev) => !prev)}
+            >
+              {mostrarCalculadoraOdd
+                ? "Ocultar calculadora de odd"
+                : "Mostrar calculadora de odd"}
+            </button>
+          </div>
+
+          {mostrarCalculadoraOdd && (
+            <div className={form.multiOddCard}>
+              <h3 className={form.multiOddTitle}>Calculadora de odd</h3>
+
+              <div className={form.multiOddRow}>
+                <input
+                  className={form.input}
+                  type="text"
+                  placeholder="Ex: 4.0"
+                  value={oddMultiplaInput}
+                  onChange={(e) => setOddMultiplaInput(e.target.value)}
+                />
+
+                <button
+                  type="button"
+                  className={form.buttonSecondary}
+                  onClick={adicionarOddMultipla}
+                >
+                  + Adicionar
+                </button>
+              </div>
+
+              {oddsMultipla.length > 0 && (
+                <div className={form.oddsList}>
+                  {oddsMultipla.map((item, index) => (
+                    <div key={`${item}-${index}`} className={form.oddTag}>
+                      <span>{item}</span>
+                      <button
+                        type="button"
+                        className={form.removeOddButton}
+                        onClick={() => removerOddMultipla(index)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className={form.multiOddActions}>
+                <button
+                  type="button"
+                  className={form.button}
+                  onClick={calcularOddMultipla}
+                  disabled={loadingOdd}
+                >
+                  {loadingOdd ? "Calculando..." : "Calcular"}
+                </button>
+
+                <button
+                  type="button"
+                  className={form.buttonSecondary}
+                  onClick={limparOddsMultipla}
+                  disabled={loadingOdd}
+                >
+                  Limpar
+                </button>
+              </div>
+
+              {oddCalculada !== null && (
+                <div className={form.oddResultBox}>
+                  <span>Odd final</span>
+                  <strong>{oddCalculada}</strong>
+                </div>
+              )}
+            </div>
+          )}
+
           <input
             className={form.input}
             type="number"

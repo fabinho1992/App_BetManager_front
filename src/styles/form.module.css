@@ -182,3 +182,139 @@
 .select:focus {
   transform: scale(1.01);
 }
+
+.calculatorToggleWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+
+.calculatorToggleButton {
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  background: rgba(37, 99, 235, 0.08);
+  color: #bfdbfe;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.calculatorToggleButton:hover {
+  background: rgba(37, 99, 235, 0.14);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+.multiOddCard {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.multiOddTitle {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.multiOddRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.multiOddActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.buttonSecondary {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  min-height: 38px;
+}
+
+.buttonSecondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.oddsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.oddTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.removeOddButton {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0;
+  line-height: 1;
+}
+
+.oddResultBox {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #d1fae5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .multiOddCard {
+    max-width: 100%;
+    padding: 12px;
+  }
+
+  .multiOddRow,
+  .multiOddActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .multiOddRow button,
+  .multiOddActions button {
+    width: 100%;
+  }
+
+  .calculatorToggleButton {
+    width: 100%;
+  }
+}
