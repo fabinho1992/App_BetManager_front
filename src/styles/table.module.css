@@ -386,6 +386,67 @@
   margin-top: 20px;
 }
 
+/* CSS ESTILO LINHAS */
+
+.rowGanha {
+  background: rgba(34, 197, 94, 0.10);
+}
+
+.rowPerdida {
+  background: rgba(239, 68, 68, 0.10);
+}
+
+/* mantém a cor mesmo quando passa o mouse */
+.rowGanha:hover {
+  background: rgba(34, 197, 94, 0.16);
+}
+
+.rowPerdida:hover {
+  background: rgba(239, 68, 68, 0.16);
+}
+
+/* garante que as células acompanhem a linha */
+.rowGanha td,
+.rowPerdida td {
+  background: transparent;
+}
+
+/* seleção visível */
+.selectedRow {
+  position: relative;
+  box-shadow: inset 0 0 0 2px #38bdf8;
+}
+
+/* seleção + status */
+.rowGanha.selectedRow {
+  background: rgba(34, 197, 94, 0.22);
+  box-shadow:
+    inset 4px 0 0 #22c55e,
+    inset 0 0 0 2px #38bdf8;
+}
+
+.rowPerdida.selectedRow {
+  background: rgba(239, 68, 68, 0.22);
+  box-shadow:
+    inset 4px 0 0 #ef4444,
+    inset 0 0 0 2px #38bdf8;
+}
+
+/* quando a linha selecionada recebe hover, não perde o destaque */
+.rowGanha.selectedRow:hover {
+  background: rgba(34, 197, 94, 0.24);
+}
+
+.rowPerdida.selectedRow:hover {
+  background: rgba(239, 68, 68, 0.24);
+}
+
+/* desktop: deixa o cursor mais claro */
+.table tbody tr {
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
 
 @media (max-width: 700px) {
   .desktopOnly {
@@ -440,5 +501,27 @@
   .buttonEditResult {
     display: block;
   }
+
+ .card.rowGanha {
+  background: rgba(34, 197, 94, 0.10);
+  border-left: 4px solid #22c55e;
+}
+
+.card.rowPerdida {
+  background: rgba(239, 68, 68, 0.10);
+  border-left: 4px solid #ef4444;
+}
+
+.card.selectedRow {
+  box-shadow: 0 0 0 2px #38bdf8;
+}
+
+.card.rowGanha.selectedRow {
+  background: rgba(34, 197, 94, 0.18);
+}
+
+.card.rowPerdida.selectedRow {
+  background: rgba(239, 68, 68, 0.18);
+}
 }
 

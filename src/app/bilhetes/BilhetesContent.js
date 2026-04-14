@@ -33,6 +33,12 @@ export default function BilhetesContent({ casa }) {
   const router = useRouter();
   const mercadoSelecionado = searchParams.get("mercado") || "";
 
+  function getStatusRowClass(status) {
+    if (status === "Ganha") return table.rowGanha;
+    if (status === "Perdida") return table.rowPerdida;
+    return "";
+  }
+
   function isActionLoading(actionName) {
     return actionLoading === actionName;
   }
@@ -678,9 +684,10 @@ export default function BilhetesContent({ casa }) {
                           bilheteSelecionado === b.id ? null : b.id,
                         )
                       }
-                      className={
-                        bilheteSelecionado === b.id ? table.selectedRow : ""
-                      }
+                      className={`
+    ${getStatusRowClass(b.status)}
+    ${bilheteSelecionado === b.id ? table.selectedRow : ""}
+  `}
                     >
                       <td>{b.usuarioNome}</td>
                       <td>{b.mercado}</td>
@@ -765,7 +772,10 @@ export default function BilhetesContent({ casa }) {
 
           <div className={table.mobileOnly}>
             {bilhetes.map((b) => (
-              <div key={b.id} className={table.card}>
+              <div
+                key={b.id}
+                className={`${table.card} ${getStatusRowClass(b.status)}`}
+              >
                 <p>
                   <strong>Usuário:</strong> {b.usuarioNome}
                 </p>
