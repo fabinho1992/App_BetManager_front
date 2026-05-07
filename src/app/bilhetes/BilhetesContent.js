@@ -29,6 +29,9 @@ export default function BilhetesContent({ casa }) {
   const [novoValorRetornado, setNovoValorRetornado] = useState("");
   const [salvandoResultado, setSalvandoResultado] = useState(false);
 
+  const [modalImagemOpen, setModalImagemOpen] = useState(false);
+  const [bilheteImagem, setBilheteImagem] = useState(null);
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const mercadoSelecionado = searchParams.get("mercado") || "";
@@ -69,6 +72,21 @@ export default function BilhetesContent({ casa }) {
       hour: "2-digit",
       minute: "2-digit",
     });
+  }
+
+  function abrirModalImagem(bilhete) {
+    if (!bilhete.imagemUrl) {
+      toast.error("Este bilhete não possui imagem.");
+      return;
+    }
+
+    setBilheteImagem(bilhete);
+    setModalImagemOpen(true);
+  }
+
+  function fecharModalImagem() {
+    setModalImagemOpen(false);
+    setBilheteImagem(null);
   }
 
   function abrirModalEditarResultado(bilhete) {
@@ -685,9 +703,9 @@ export default function BilhetesContent({ casa }) {
                         )
                       }
                       className={`
-    ${getStatusRowClass(b.status)}
-    ${bilheteSelecionado === b.id ? table.selectedRow : ""}
-  `}
+                        ${getStatusRowClass(b.status)}
+                        ${bilheteSelecionado === b.id ? table.selectedRow : ""}
+                      `}
                     >
                       <td>{b.usuarioNome}</td>
                       <td>{b.mercado}</td>
@@ -700,68 +718,81 @@ export default function BilhetesContent({ casa }) {
                       <td>{b.status}</td>
 
                       <td>
-                        {b.status === "Pendente" ? (
-                          <div className={table.actionsContainer}>
-                            <button
-                              className={table.buttonSuccess}
-                              disabled={actionLoading !== ""}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                atualizarStatus(b.id, 1);
-                              }}
-                            >
-                              {isActionLoading(`status-${b.id}-1`)
-                                ? "..."
-                                : "✓"}
-                            </button>
+                        <div className={table.actionsColumn}>
+                          <button
+                            className={table.buttonViewTicket}
+                            disabled={actionLoading !== "" || !b.imagemUrl}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              abrirModalImagem(b);
+                            }}
+                          >
+                            Ver bilhete
+                          </button>
 
-                            <button
-                              className={table.buttonDanger}
-                              disabled={actionLoading !== ""}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                atualizarStatus(b.id, 2);
-                              }}
-                            >
-                              {isActionLoading(`status-${b.id}-2`)
-                                ? "..."
-                                : "✕"}
-                            </button>
-
-                            <button
-                              className={table.buttonCancel}
-                              disabled={actionLoading !== ""}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                atualizarStatus(b.id, 3);
-                              }}
-                            >
-                              {isActionLoading(`status-${b.id}-3`)
-                                ? "..."
-                                : "🚫"}
-                            </button>
-                          </div>
-                        ) : (
-                          <div className={table.finalizadoContainer}>
-                            <span className={table.badgeFinalizado}>
-                              ✓ Finalizado
-                            </span>
-
-                            {b.status === "Ganha" && (
+                          {b.status === "Pendente" ? (
+                            <div className={table.actionsContainer}>
                               <button
-                                className={table.buttonEditResult}
+                                className={table.buttonSuccess}
                                 disabled={actionLoading !== ""}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  abrirModalEditarResultado(b);
+                                  atualizarStatus(b.id, 1);
                                 }}
                               >
-                                <span className={table.buttonIcon}>✏️</span>
-                                <span>Editar</span>
+                                {isActionLoading(`status-${b.id}-1`)
+                                  ? "..."
+                                  : "✓"}
                               </button>
-                            )}
-                          </div>
-                        )}
+
+                              <button
+                                className={table.buttonDanger}
+                                disabled={actionLoading !== ""}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  atualizarStatus(b.id, 2);
+                                }}
+                              >
+                                {isActionLoading(`status-${b.id}-2`)
+                                  ? "..."
+                                  : "✕"}
+                              </button>
+
+                              <button
+                                className={table.buttonCancel}
+                                disabled={actionLoading !== ""}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  atualizarStatus(b.id, 3);
+                                }}
+                              >
+                                {isActionLoading(`status-${b.id}-3`)
+                                  ? "..."
+                                  : "🚫"}
+                              </button>
+                            </div>
+                          ) : (
+                            <div className={table.finalizadoContainer}>
+                              <span className={table.badgeFinalizado}>
+                                ✓ Finalizado
+                              </span>
+
+                              {b.status === "Ganha" && (
+                                <button
+                                  className={table.buttonEditResult}
+                                  disabled={actionLoading !== ""}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    abrirModalEditarResultado(b);
+                                  }}
+                                >
+                                  <span className={table.buttonIcon}>✏️</span>
+                                  <span>Editar</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -850,6 +881,16 @@ export default function BilhetesContent({ casa }) {
 
                 <div style={{ marginTop: "12px" }}>
                   <button
+                    className={table.buttonViewTicket}
+                    disabled={actionLoading !== "" || !b.imagemUrl}
+                    onClick={() => abrirModalImagem(b)}
+                  >
+                    Ver bilhete
+                  </button>
+                </div>
+
+                <div style={{ marginTop: "12px" }}>
+                  <button
                     className={table.buttonDanger}
                     disabled={actionLoading !== ""}
                     onClick={() => excluirBilheteMobile(b.id)}
@@ -894,6 +935,40 @@ export default function BilhetesContent({ casa }) {
           </div>
         </div>
       </div>
+
+      {modalImagemOpen && (
+        <div className={table.modalOverlay} onClick={fecharModalImagem}>
+          <div
+            className={table.imageModalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={table.imageModalHeader}>
+              <div>
+                <h3 className={table.modalTitle}>Imagem do bilhete</h3>
+                <p className={table.imageModalSubtitle}>
+                  {bilheteImagem?.mercado} • {bilheteImagem?.casaAposta}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className={table.buttonCloseModal}
+                onClick={fecharModalImagem}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={table.imagePreviewWrapper}>
+              <img
+                src={bilheteImagem?.imagemUrl}
+                alt="Imagem do bilhete"
+                className={table.imagePreview}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {modalEditarOpen && (
         <div className={table.modalOverlay}>

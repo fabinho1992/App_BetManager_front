@@ -447,6 +447,103 @@
   transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
+.actionsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.buttonViewTicket {
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.buttonViewTicket:hover {
+  transform: translateY(-1px);
+}
+
+.buttonViewTicket:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.imageModalContent {
+  width: min(92vw, 720px);
+  max-height: 90vh;
+  background: #0f172a;
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+  animation: modalFadeIn 0.2s ease;
+}
+
+.imageModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.imageModalSubtitle {
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.buttonCloseModal {
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.buttonCloseModal:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.imagePreviewWrapper {
+  width: 100%;
+  max-height: 70vh;
+  overflow: auto;
+  border-radius: 16px;
+  background: #020617;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imagePreview {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 
 @media (max-width: 700px) {
   .desktopOnly {

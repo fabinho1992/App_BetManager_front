@@ -16,6 +16,7 @@ export default function CriarBilhete() {
   const [mercadoAposta, setMercadoAposta] = useState(null);
   const [casaAposta, setCasaAposta] = useState("");
   const [dataAposta, setDataAposta] = useState("");
+  const [imagemBilhete, setImagemBilhete] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingUsuario, setLoadingUsuario] = useState(true);
 
@@ -27,8 +28,20 @@ export default function CriarBilhete() {
 
   const router = useRouter();
 
-  const oddNumber = Number(odd);
+  const oddNumber = odd ? Number(odd.replace(",", ".")) : 0;
   const oddEhSeguraAutomatica = odd !== "" && oddNumber <= 2;
+
+  // Converter virgula para ponto
+  function parseOdd(value) {
+  if (!value) return 0;
+
+  const valorNormalizado = value
+    .toString()
+    .trim()
+    .replace(",", ".");
+
+  return Number(valorNormalizado);
+}
 
   function formatCurrency(value) {
     value = value.replace(/\D/g, "");
@@ -43,6 +56,25 @@ export default function CriarBilhete() {
   function parseCurrency(value) {
     if (!value) return 0;
     return Number(value.replace(/\D/g, "")) / 100;
+  }
+
+  function validarImagem(file) {
+    if (!file) return true;
+
+    const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
+    const tamanhoMaximo = 5 * 1024 * 1024;
+
+    if (!tiposPermitidos.includes(file.type)) {
+      toast.error("Formato inválido. Use JPG, PNG ou WEBP.");
+      return false;
+    }
+
+    if (file.size > tamanhoMaximo) {
+      toast.error("A imagem não pode ter mais que 5MB.");
+      return false;
+    }
+
+    return true;
   }
 
   function adicionarOddMultipla() {
@@ -156,17 +188,35 @@ export default function CriarBilhete() {
         return;
       }
 
-      const payload = {
-        odd: Number(odd),
-        valorApostado: parseCurrency(valorApostado),
-        tipoBanca: oddEhSeguraAutomatica ? 1 : tipoAposta,
-        statusEnum: statusAposta,
-        casaAposta: casaAposta,
-        mercado: mercadoAposta,
-        dataAposta: dataAposta ? new Date(dataAposta).toISOString() : null,
-      };
+      if (!validarImagem(imagemBilhete)) {
+        return;
+      }
 
-      await api.post("/bilhete", payload);
+      const oddConvertida = parseOdd(odd);
+
+      if (!oddConvertida || Number.isNaN(oddConvertida) || oddConvertida <= 1) {
+        toast.error("Informe uma odd válida.");
+        return;
+      }
+
+      const formData = new FormData();
+
+      formData.append("odd", parseOdd(odd).toString().replace(".", ","));
+      formData.append("valorApostado", parseCurrency(valorApostado));
+      formData.append("tipoBanca", oddEhSeguraAutomatica ? 1 : tipoAposta);
+      formData.append("statusEnum", statusAposta);
+      formData.append("casaAposta", casaAposta);
+      formData.append("mercado", mercadoAposta);
+
+      if (dataAposta) {
+        formData.append("dataAposta", new Date(dataAposta).toISOString());
+      }
+
+      if (imagemBilhete) {
+        formData.append("imagem", imagemBilhete);
+      }
+
+      await api.post("/bilhete", formData);
 
       toast.success("Bilhete criado com sucesso!");
       atualizarBancaHeader();
@@ -277,8 +327,9 @@ export default function CriarBilhete() {
 
           <input
             className={form.input}
-            type="number"
-            placeholder="Odd"
+            type="text"
+            inputMode="decimal"
+            placeholder="Odd. Ex: 2.5 ou 2,5"
             value={odd}
             onChange={(e) => setOdd(e.target.value)}
           />
@@ -362,6 +413,23 @@ export default function CriarBilhete() {
             value={dataAposta}
             onChange={(e) => setDataAposta(e.target.value)}
           />
+
+          <div className={form.uploadBox}>
+            <label className={form.uploadLabel}>Imagem do bilhete</label>
+
+            <input
+              className={form.input}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={(e) => setImagemBilhete(e.target.files?.[0] || null)}
+            />
+
+            {imagemBilhete && (
+              <p className={form.uploadInfo}>
+                Imagem selecionada: {imagemBilhete.name}
+              </p>
+            )}
+          </div>
 
           <button className={form.button} disabled={loading || loadingUsuario}>
             {loading ? "⏳ Criando..." : "Criar"}

@@ -297,6 +297,22 @@
   font-size: 14px;
 }
 
+.uploadBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.uploadLabel {
+  font-weight: 700;
+  color: #e5e7eb;
+}
+
+.uploadInfo {
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
 @media (max-width: 768px) {
   .multiOddCard {
     max-width: 100%;
