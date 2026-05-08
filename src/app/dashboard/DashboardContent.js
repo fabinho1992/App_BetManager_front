@@ -66,6 +66,8 @@ export default function Dashboard() {
 
       const res = await api.get(url);
 
+      console.log("Dashboard API:", res.data.data);
+
       if (!res.data?.data) {
         setDadosDashboard(null);
         return;
@@ -316,9 +318,9 @@ export default function Dashboard() {
           <div className={dashboard.conteudoCentral}>
             <div className={dashboard.graficoWrapper}>
               <GraficoPizza
-                ganhas={dadosDashboard.totalGanhas}
-                perdidas={dadosDashboard.totalPerdidas}
-                canceladas={dadosDashboard.totalCanceladas || 0}
+                ganhas={dadosDashboard.totalGanhas || 0}
+                perdidas={dadosDashboard.totalPerdidas || 0}
+                pendentes={dadosDashboard.totalPendentes || 0}
               />
             </div>
 

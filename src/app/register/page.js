@@ -7,8 +7,8 @@ import form from "@/styles/form.module.css";
 import layout from "@/styles/layout.module.css";
 import toast from "react-hot-toast";
 
-
 export default function Register() {
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [formData, setFormData] = useState({
     displayName: "",
     cpf: "",
@@ -16,7 +16,7 @@ export default function Register() {
     casaPreferida: "",
     bancaInicial: "",
     metaBanca: "",
-    password: ""
+    password: "",
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -29,9 +29,8 @@ export default function Register() {
     passwordChecks.symbol;
   const [errors, setErrors] = useState({
     cpf: "",
-    email: ""
+    email: "",
   });
-
 
   const passwordStrength = calculateStrength(formData.password);
   const cpfNumbers = formData.cpf.replace(/\D/g, "");
@@ -48,7 +47,6 @@ export default function Register() {
     parseCurrency(formData.metaBanca) <= 0;
 
   function handleChange(e) {
-
     let { name, value } = e.target;
 
     if (name === "cpf") {
@@ -60,7 +58,6 @@ export default function Register() {
     }
 
     setFormData({ ...formData, [name]: value });
-
   }
 
   //Validação em tempo real cpf
@@ -70,7 +67,7 @@ export default function Register() {
 
     setFormData((prev) => ({
       ...prev,
-      cpf: formatted
+      cpf: formatted,
     }));
 
     const numbers = formatted.replace(/\D/g, "");
@@ -92,7 +89,7 @@ export default function Register() {
 
     setFormData((prev) => ({
       ...prev,
-      email: value
+      email: value,
     }));
 
     if (!value) {
@@ -103,11 +100,10 @@ export default function Register() {
       setErrors((prev) => ({ ...prev, email: "" }));
     }
 
-
     console.log({
       errors,
       cpfLength: formData.cpf.replace(/\D/g, "").length,
-      isFormInvalid
+      isFormInvalid,
     });
   }
 
@@ -131,7 +127,6 @@ export default function Register() {
     setLoading(true);
 
     try {
-
       if (errors.cpf || errors.email) {
         toast.error("Corrija os erros antes de continuar");
         return;
@@ -146,7 +141,7 @@ export default function Register() {
         casaPreferida: formData.casaPreferida,
         bancaInicial: parseCurrency(formData.bancaInicial),
         metaBanca: parseCurrency(formData.metaBanca),
-        password: formData.password
+        password: formData.password,
       });
 
       toast.success("Usuário criado!");
@@ -155,7 +150,10 @@ export default function Register() {
       console.log("Erro completo:", error);
       console.log("Response:", error.response?.data);
       console.log("Mensagem:", error.response?.data?.Erros?.[0]?.Message);
-      alert(error.response?.data?.Erros?.[0]?.Message || "Erro ao cadastrar usuário");
+      alert(
+        error.response?.data?.Erros?.[0]?.Message ||
+          "Erro ao cadastrar usuário",
+      );
     } finally {
       setLoading(false);
     }
@@ -220,7 +218,8 @@ export default function Register() {
 
     if (value.length <= 3) return value;
     if (value.length <= 6) return value.replace(/(\d{3})(\d+)/, "$1.$2");
-    if (value.length <= 9) return value.replace(/(\d{3})(\d{3})(\d+)/, "$1.$2.$3");
+    if (value.length <= 9)
+      return value.replace(/(\d{3})(\d{3})(\d+)/, "$1.$2.$3");
 
     return value.replace(/(\d{3})(\d{3})(\d{3})(\d+)/, "$1.$2.$3-$4");
   }
@@ -256,17 +255,25 @@ export default function Register() {
   function parseCurrency(value) {
     if (!value) return 0;
 
-    return Number(
-      value
-        .replace(/\D/g, "") // remove tudo
-    ) / 100;
+    return (
+      Number(
+        value.replace(/\D/g, ""), // remove tudo
+      ) / 100
+    );
   }
-
-
 
   return (
     <div className={layout.container}>
+      
       <div className={layout.card}>
+        <div className={form.headerTop}>
+          <button
+            className={form.buttonBack}
+            onClick={() => router.push("/dashboard")}
+          >
+            ← Voltar
+          </button>
+        </div>
         <h1>Criar Conta</h1>
 
         <form className={form.form} onSubmit={handleSubmit}>
@@ -298,7 +305,9 @@ export default function Register() {
             onChange={handleEmailChange}
           />
 
-          {errors.email && <span className={form.errorText}>{errors.email}</span>}
+          {errors.email && (
+            <span className={form.errorText}>{errors.email}</span>
+          )}
           <input
             className={form.input}
             name="bancaInicial"
@@ -306,7 +315,7 @@ export default function Register() {
             value={formData.bancaInicial || ""}
             onChange={handleChange}
           />
-          
+
           <input
             className={form.input}
             name="metaBanca"
@@ -315,25 +324,35 @@ export default function Register() {
             onChange={handleChange}
           />
           <select
-                name="casaPreferida"
-                value={formData.casaPreferida}
-                onChange={handleChange}
-                className={form.select}
-              >
-            <option value="">Selecione a casa</option>
-                <option value="Betano">Betano</option>
-                <option value="Bet365">Bet365</option>
-                <option value="SuperBet">SuperBet</option>
-                <option value="SportingBet">SportingBet</option>
-          </select>
-          <input
-            className={form.input}
-            type="password"
-            placeholder="Senha"
-            name="password"
-            value={formData.password}
+            name="casaPreferida"
+            value={formData.casaPreferida}
             onChange={handleChange}
-          />
+            className={form.select}
+          >
+            <option value="">Selecione a casa</option>
+            <option value="Betano">Betano</option>
+            <option value="Bet365">Bet365</option>
+            <option value="SuperBet">SuperBet</option>
+            <option value="SportingBet">SportingBet</option>
+          </select>
+          <div className={layout.passwordWrapper}>
+            <input
+              className={form.input}
+              type={mostrarSenha ? "text" : "password"}
+              placeholder="Senha"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+
+            <button
+              type="button"
+              onClick={() => setMostrarSenha((prev) => !prev)}
+              className={layout.showPasswordButton}
+            >
+              {mostrarSenha ? "Ocultar" : "Mostrar"}
+            </button>
+          </div>
 
           {/* Barra de força */}
           <div className={form.passwordStrength}>
@@ -359,14 +378,11 @@ export default function Register() {
             </span>
           </div>
 
-          <button
-            className={form.button}
-            disabled={isFormInvalid}
-          >
+          <button className={form.button} disabled={isFormInvalid}>
             {loading ? "⏳ Cadastrando..." : "Cadastrar"}
           </button>
         </form>
       </div>
-    </div >
+    </div>
   );
 }

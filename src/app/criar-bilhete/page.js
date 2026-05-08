@@ -33,15 +33,12 @@ export default function CriarBilhete() {
 
   // Converter virgula para ponto
   function parseOdd(value) {
-  if (!value) return 0;
+    if (!value) return 0;
 
-  const valorNormalizado = value
-    .toString()
-    .trim()
-    .replace(",", ".");
+    const valorNormalizado = value.toString().trim().replace(",", ".");
 
-  return Number(valorNormalizado);
-}
+    return Number(valorNormalizado);
+  }
 
   function formatCurrency(value) {
     value = value.replace(/\D/g, "");
@@ -235,10 +232,11 @@ export default function CriarBilhete() {
       <div className={layout.card}>
         <div className={form.headerTop}>
           <button
+            type="button"
             className={form.buttonBack}
             onClick={() => router.push("/dashboard")}
           >
-            ← Voltar
+            ← Volta
           </button>
         </div>
 

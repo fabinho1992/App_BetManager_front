@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 export default function RecuperarSenha() {
-
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [codigoEnviado, setCodigoEnviado] = useState(false);
@@ -22,41 +21,40 @@ export default function RecuperarSenha() {
     setLoading(true);
 
     try {
-
       await api.post("/Auth/resetpassword", {
-        email: email
+        email: email,
       });
 
       toast.success("Código enviado para seu email!");
 
       localStorage.setItem("resetEmail", email);
       router.push("/novasenha");
-
     } catch (error) {
-
       console.log(error);
       toast.error(
-        error.response?.data?.Erros?.[0]?.Message ||
-        "Erro ao enviar código"
+        error.response?.data?.Erros?.[0]?.Message || "Erro ao enviar código",
       );
-
     } finally {
       setLoading(false);
     }
   }
-  
-  
 
   return (
     <div className={layout.container}>
       <div className={layout.card}>
+        <div className={form.headerTop}>
+          <button
+            className={form.buttonBack}
+            onClick={() => router.push("/dashboard")}
+          >
+            ← Voltar
+          </button>
+        </div>
 
         <h1>Recuperar Senha</h1>
 
         {!codigoEnviado ? (
-
           <form className={form.form} onSubmit={enviarCodigo}>
-
             <input
               className={form.input}
               placeholder="Digite seu email"
@@ -67,13 +65,9 @@ export default function RecuperarSenha() {
             <button className={form.button} disabled={loading}>
               {loading ? "⏳ Enviando..." : "Enviar código"}
             </button>
-
           </form>
-
         ) : (
-
           <form className={form.form} onSubmit={validarCodigo}>
-
             <input
               className={form.input}
               placeholder="Digite o código recebido"
@@ -84,11 +78,8 @@ export default function RecuperarSenha() {
             <button className={form.button} disabled={loading}>
               {loading ? "⏳ Validando..." : "Validar código"}
             </button>
-
           </form>
-
         )}
-
       </div>
     </div>
   );

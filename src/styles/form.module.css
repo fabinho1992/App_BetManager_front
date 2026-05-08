@@ -21,6 +21,24 @@
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
 }
 
+.loginPageContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.loginLogoOutside {
+  display: flex;
+  justify-content: center;
+}
+
+.loginLogo {
+  width: 300px;
+  height: auto;
+  object-fit: contain;
+}
+
 .button {
   padding: 0.9rem;
   background: linear-gradient(135deg, #22c55e, #16a34a);
@@ -168,6 +186,7 @@
 .buttonBack:hover {
   background: #334155;
   transform: translateX(-3px);
+  cursor: pointer;
 }
 
 .select {

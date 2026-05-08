@@ -8,6 +8,7 @@ import api from "@/services/api";
 import form from "@/styles/form.module.css";
 import layout from "@/styles/layout.module.css";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState("");
   const router = useRouter();
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   function navegarPara(pagina) {
     setLoadingPage(pagina);
@@ -56,6 +58,17 @@ export default function LoginPage() {
 
   return (
     <div className={layout.container}>
+      <div className={form.loginPageContent}>
+      <div className={form.loginLogoOutside}>
+        <Image
+          src="/BetVision-Logo.png"
+          alt="BetVision"
+          width={800}
+          height={100}
+          className={form.loginLogo}
+          priority
+        />
+      </div>
       <div className={layout.card}>
         <h1>Login</h1>
 
@@ -68,13 +81,23 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
-          <input
-            className={form.input}
-            type="password"
-            placeholder="Senha"
-            required
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className={layout.passwordWrapper}>
+            <input
+              type={mostrarSenha ? "text" : "password"}
+              placeholder="Senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={form.input}
+            />
+
+            <button
+              type="button"
+              onClick={() => setMostrarSenha((prev) => !prev)}
+              className={layout.showPasswordButton}
+            >
+              {mostrarSenha ? "Ocultar" : "Mostrar"}
+            </button>
+          </div>
 
           <button className={form.button} disabled={loading}>
             {loading ? "⏳ Entrando..." : "Entrar"}
@@ -100,6 +123,7 @@ export default function LoginPage() {
               : "Recuperar senha"}
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

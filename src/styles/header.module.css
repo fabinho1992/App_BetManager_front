@@ -142,6 +142,7 @@
 .logoWrapper {
   display: flex;
   align-items: center;
+   pointer-events: none;
 }
 
 .logoImage {
@@ -149,6 +150,7 @@
   width: auto;
   height: auto;
   object-fit: contain;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {

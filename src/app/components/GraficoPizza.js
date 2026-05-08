@@ -2,15 +2,23 @@
 
 import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
-export default function GraficoPizza({ ganhas, perdidas }) {
+export default function GraficoPizza({ ganhas = 0, perdidas = 0, pendentes = 0 }) {
   const data = [
-    { name: "Ganhos", value: ganhas },
-    { name: "Perdidos", value: perdidas },
-  ];
+    { name: "Ganhas", value: ganhas },
+    { name: "Perdidas", value: perdidas },
+    { name: "Pendentes", value: pendentes },
+  ].filter((item) => item.value > 0);
 
+  const renderLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+  }) => {
+    if (percent === 0) return null;
 
-  // label dentro do slice mostrando percentual
-  const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -33,7 +41,6 @@ export default function GraficoPizza({ ganhas, perdidas }) {
 
   return (
     <PieChart width={400} height={300}>
-
       <defs>
         <linearGradient id="greenGradient" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#00e676" />
@@ -43,6 +50,11 @@ export default function GraficoPizza({ ganhas, perdidas }) {
         <linearGradient id="redGradient" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#ff5252" />
           <stop offset="100%" stopColor="#d50000" />
+        </linearGradient>
+
+        <linearGradient id="grayGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#9ca3af" />
+          <stop offset="100%" stopColor="#4b5563" />
         </linearGradient>
       </defs>
 
@@ -57,8 +69,17 @@ export default function GraficoPizza({ ganhas, perdidas }) {
         label={renderLabel}
         labelLine={false}
       >
-        <Cell fill="url(#greenGradient)" />
-        <Cell fill="url(#redGradient)" />
+        {data.map((item) => {
+          if (item.name === "Ganhas") {
+            return <Cell key={item.name} fill="url(#greenGradient)" />;
+          }
+
+          if (item.name === "Perdidas") {
+            return <Cell key={item.name} fill="url(#redGradient)" />;
+          }
+
+          return <Cell key={item.name} fill="url(#grayGradient)" />;
+        })}
       </Pie>
 
       <Tooltip

@@ -3,7 +3,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 60px;
 }
 
 .card_table {
@@ -11,6 +10,7 @@
   padding: 2rem;
   border-radius: 10px;
   width: 100%;
+  margin-top: 70px;
   max-width: 1000px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
 }
@@ -154,5 +154,26 @@
   align-items: center;
   min-height: 100vh;
   font-size: 20px;
+}
+
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordWrapper input {
+  width: 100%;
+  padding-right: 90px;
+}
+
+.showPasswordButton {
+  position: absolute;
+  right: 10px;
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
 }
 

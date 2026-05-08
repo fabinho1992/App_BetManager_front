@@ -91,7 +91,7 @@ export default function Header() {
               src="/BetVision-Logo.png"
               alt="BetVision"
               width={200}
-              height={50}
+              height={10}
               className={styles.logoImage}
               priority
             />

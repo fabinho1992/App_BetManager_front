@@ -13,6 +13,8 @@ export default function NovaSenha() {
   const [code, setCodigo] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const router = useRouter();
 
@@ -71,15 +73,25 @@ export default function NovaSenha() {
             onChange={(e) => setCodigo(e.target.value)}
             required
           />
-
+          <div className={layout.passwordWrapper}>
           <input
-            className={form.input}
-            type="password"
-            placeholder="Nova senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+             type={mostrarSenha ? "text" : "password"}
+              placeholder="Senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={form.input}
+            />
+
+            <button
+              type="button"
+              onClick={() => setMostrarSenha((prev) => !prev)}
+              className={layout.showPasswordButton}
+            >
+              {mostrarSenha ? "Ocultar" : "Mostrar"}
+            </button>
+
+          </div>
+
 
           <button className={form.button} disabled={loading}>
             {loading ? "⏳ Alterando..." : "Alterar senha"}
