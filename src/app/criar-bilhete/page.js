@@ -20,30 +20,48 @@ export default function CriarBilhete() {
   const [loading, setLoading] = useState(false);
   const [loadingUsuario, setLoadingUsuario] = useState(true);
 
+  // Calculadora de odd
   const [mostrarCalculadoraOdd, setMostrarCalculadoraOdd] = useState(false);
   const [oddMultiplaInput, setOddMultiplaInput] = useState("");
   const [oddsMultipla, setOddsMultipla] = useState([]);
   const [oddCalculada, setOddCalculada] = useState(null);
   const [loadingOdd, setLoadingOdd] = useState(false);
 
+  // Análise de imagem com IA
+  const [analisando, setAnalisando] = useState(false);
+  const [modoIA, setModoIA] = useState(false);
+
+  const mercadoMap = {
+    Escanteios: 0,
+    Gols: 1,
+    Cartoes: 2,
+    AmbasMarcam: 3,
+    ResultadoFinal: 4,
+    Basquete: 5,
+  };
+
+  const casaApostaMap = {
+    Betano: "Betano",
+    Bet365: "Bet365",
+    SuperBet: "SuperBet",
+    SportingBet: "SportingBet",
+    EsportivaBet: "EsportivaBet",
+  };
+
   const router = useRouter();
 
   const oddNumber = odd ? Number(odd.replace(",", ".")) : 0;
   const oddEhSeguraAutomatica = odd !== "" && oddNumber <= 2;
 
-  // Converter virgula para ponto
   function parseOdd(value) {
     if (!value) return 0;
-
     const valorNormalizado = value.toString().trim().replace(",", ".");
-
     return Number(valorNormalizado);
   }
 
   function formatCurrency(value) {
     value = value.replace(/\D/g, "");
     const number = Number(value) / 100;
-
     return number.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -57,31 +75,25 @@ export default function CriarBilhete() {
 
   function validarImagem(file) {
     if (!file) return true;
-
     const tiposPermitidos = ["image/jpeg", "image/png", "image/webp"];
     const tamanhoMaximo = 5 * 1024 * 1024;
-
     if (!tiposPermitidos.includes(file.type)) {
       toast.error("Formato inválido. Use JPG, PNG ou WEBP.");
       return false;
     }
-
     if (file.size > tamanhoMaximo) {
       toast.error("A imagem não pode ter mais que 5MB.");
       return false;
     }
-
     return true;
   }
 
   function adicionarOddMultipla() {
     const valor = Number(oddMultiplaInput.replace(",", "."));
-
     if (!valor || valor <= 1) {
       toast.error("Informe uma odd válida maior que 1.");
       return;
     }
-
     setOddsMultipla((prev) => [...prev, valor]);
     setOddMultiplaInput("");
   }
@@ -95,16 +107,12 @@ export default function CriarBilhete() {
       toast.error("Adicione ao menos uma odd.");
       return;
     }
-
     try {
       setLoadingOdd(true);
-
       const response = await api.post("/Bilhete/calcular-odd", {
         odds: oddsMultipla,
       });
-
       const oddFinal = response.data.data.oddFinal;
-
       setOddCalculada(oddFinal);
       setOdd(String(oddFinal));
       toast.success("Odd calculada com sucesso!");
@@ -122,9 +130,34 @@ export default function CriarBilhete() {
     setOddCalculada(null);
   }
 
+  // Analisa imagem e cria bilhete automaticamente
+  async function handleAnalisarECriar() {
+    if (!imagemBilhete) {
+      toast.error("Selecione uma imagem primeiro.");
+      return;
+    }
+    if (!validarImagem(imagemBilhete)) return;
+
+    try {
+      setAnalisando(true);
+      const formData = new FormData();
+      formData.append("imagem", imagemBilhete);
+
+      await api.post("/Bilhete/analisar-imagem", formData);
+
+      toast.success("Bilhete criado com sucesso!");
+      atualizarBancaHeader();
+      router.push("/bilhetes");
+    } catch (error) {
+      console.error("Erro ao analisar imagem:", error.response?.data || error);
+      toast.error("Erro ao analisar imagem. Tente novamente.");
+    } finally {
+      setAnalisando(false);
+    }
+  }
+
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       router.push("/");
       return;
@@ -132,26 +165,17 @@ export default function CriarBilhete() {
 
     async function carregarCasaPreferida() {
       try {
-        const email = localStorage.getItem("email");
-        if (!email) return;
-
         const response = await api.get("/Usuario/email");
         const usuario = response.data.data;
-
-        const casaPreferidaNome = usuario?.casaPreferida;
-        if (casaPreferidaNome) {
-          setCasaAposta(casaPreferidaNome);
+        if (usuario?.casaPreferida) {
+          setCasaAposta(usuario.casaPreferida);
         }
       } catch (error) {
-        console.error(
-          "Erro ao carregar usuário:",
-          error.response?.data || error,
-        );
+        console.error("Erro ao carregar usuário:", error.response?.data || error);
       } finally {
         setLoadingUsuario(false);
       }
     }
-
     carregarCasaPreferida();
   }, [router]);
 
@@ -165,62 +189,45 @@ export default function CriarBilhete() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-
     try {
       setLoading(true);
 
-      if (
-        !odd ||
-        !valorApostado ||
-        statusAposta === null ||
-        !casaAposta ||
-        mercadoAposta === null
-      ) {
+      if (!odd || !valorApostado || statusAposta === null || !casaAposta || mercadoAposta === null) {
         toast.error("Preencha todos os campos");
         return;
       }
-
       if (!oddEhSeguraAutomatica && tipoAposta === null) {
         toast.error("Selecione o tipo de aposta");
         return;
       }
-
-      if (!validarImagem(imagemBilhete)) {
-        return;
-      }
+      if (!validarImagem(imagemBilhete)) return;
 
       const oddConvertida = parseOdd(odd);
-
       if (!oddConvertida || Number.isNaN(oddConvertida) || oddConvertida <= 1) {
         toast.error("Informe uma odd válida.");
         return;
       }
 
       const formData = new FormData();
-
       formData.append("odd", parseOdd(odd).toString().replace(".", ","));
       formData.append("valorApostado", parseCurrency(valorApostado));
       formData.append("tipoBanca", oddEhSeguraAutomatica ? 1 : tipoAposta);
       formData.append("statusEnum", statusAposta);
       formData.append("casaAposta", casaAposta);
       formData.append("mercado", mercadoAposta);
-
       if (dataAposta) {
         formData.append("dataAposta", new Date(dataAposta).toISOString());
       }
-
       if (imagemBilhete) {
         formData.append("imagem", imagemBilhete);
       }
 
       await api.post("/bilhete", formData);
-
       toast.success("Bilhete criado com sucesso!");
       atualizarBancaHeader();
       router.push("/bilhetes");
     } catch (error) {
       console.error("Erro completo:", error);
-      console.error("Response:", error.response?.data);
       toast.error("Erro ao criar bilhete");
     } finally {
       setLoading(false);
@@ -230,6 +237,7 @@ export default function CriarBilhete() {
   return (
     <div className={layout.container}>
       <div className={layout.card}>
+
         <div className={form.headerTop}>
           <button
             type="button"
@@ -242,198 +250,353 @@ export default function CriarBilhete() {
 
         <h1>Novo Bilhete</h1>
 
-        <form className={form.form} onSubmit={handleSubmit}>
-          <div className={form.calculatorToggleWrapper}>
+        {/* Toggle Manual / IA */}
+        <div style={styles.toggleWrapper}>
+          <button
+            type="button"
+            style={{
+              ...styles.toggleBtn,
+              ...((!modoIA) ? styles.toggleBtnActive : {}),
+            }}
+            onClick={() => setModoIA(false)}
+          >
+            Manual
+          </button>
+          <button
+            type="button"
+            style={{
+              ...styles.toggleBtn,
+              ...(modoIA ? styles.toggleBtnActive : {}),
+            }}
+            onClick={() => setModoIA(true)}
+          >
+            🤖 Analisar com IA
+          </button>
+        </div>
+
+        {/* MODO IA */}
+        {modoIA && (
+          <div style={styles.iaSection}>
+            <p style={styles.iaDesc}>
+              Envie o print da aposta e a IA cria o bilhete automaticamente.
+            </p>
+
+            <label style={styles.uploadArea}>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) => setImagemBilhete(e.target.files?.[0] || null)}
+                style={{ display: "none" }}
+              />
+              {imagemBilhete ? (
+                <div style={styles.uploadSelected}>
+                  <span style={styles.uploadIcon}>🖼️</span>
+                  <span style={styles.uploadFileName}>{imagemBilhete.name}</span>
+                  <span style={styles.uploadChange}>Trocar imagem</span>
+                </div>
+              ) : (
+                <div style={styles.uploadPlaceholder}>
+                  <span style={styles.uploadIcon}>📎</span>
+                  <span style={styles.uploadText}>Clique para selecionar a imagem</span>
+                  <span style={styles.uploadHint}>JPG, PNG ou WEBP • Máx 5MB</span>
+                </div>
+              )}
+            </label>
+
+            {imagemBilhete && !analisando && (
+              <p style={styles.avisoIA}>
+                ⚠️ O bilhete será criado automaticamente com os dados da imagem.
+              </p>
+            )}
+
             <button
               type="button"
-              className={form.calculatorToggleButton}
-              onClick={() => setMostrarCalculadoraOdd((prev) => !prev)}
+              className={form.button}
+              onClick={handleAnalisarECriar}
+              disabled={!imagemBilhete || analisando}
+              style={{ opacity: !imagemBilhete || analisando ? 0.6 : 1 }}
             >
-              {mostrarCalculadoraOdd
-                ? "Ocultar calculadora de odd"
-                : "Mostrar calculadora de odd"}
+              {analisando ? "⏳ Analisando e criando bilhete..." : "🤖 Analisar e criar bilhete"}
             </button>
           </div>
+        )}
 
-          {mostrarCalculadoraOdd && (
-            <div className={form.multiOddCard}>
-              <h3 className={form.multiOddTitle}>Calculadora de odd</h3>
+        {/* MODO MANUAL */}
+        {!modoIA && (
+          <form className={form.form} onSubmit={handleSubmit}>
 
-              <div className={form.multiOddRow}>
-                <input
-                  className={form.input}
-                  type="text"
-                  placeholder="Ex: 4.0"
-                  value={oddMultiplaInput}
-                  onChange={(e) => setOddMultiplaInput(e.target.value)}
-                />
-
-                <button
-                  type="button"
-                  className={form.buttonSecondary}
-                  onClick={adicionarOddMultipla}
-                >
-                  + Adicionar
-                </button>
-              </div>
-
-              {oddsMultipla.length > 0 && (
-                <div className={form.oddsList}>
-                  {oddsMultipla.map((item, index) => (
-                    <div key={`${item}-${index}`} className={form.oddTag}>
-                      <span>{item}</span>
-                      <button
-                        type="button"
-                        className={form.removeOddButton}
-                        onClick={() => removerOddMultipla(index)}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className={form.multiOddActions}>
-                <button
-                  type="button"
-                  className={form.button}
-                  onClick={calcularOddMultipla}
-                  disabled={loadingOdd}
-                >
-                  {loadingOdd ? "Calculando..." : "Calcular"}
-                </button>
-
-                <button
-                  type="button"
-                  className={form.buttonSecondary}
-                  onClick={limparOddsMultipla}
-                  disabled={loadingOdd}
-                >
-                  Limpar
-                </button>
-              </div>
-
-              {oddCalculada !== null && (
-                <div className={form.oddResultBox}>
-                  <span>Odd final</span>
-                  <strong>{oddCalculada}</strong>
-                </div>
-              )}
+            <div className={form.calculatorToggleWrapper}>
+              <button
+                type="button"
+                className={form.calculatorToggleButton}
+                onClick={() => setMostrarCalculadoraOdd((prev) => !prev)}
+              >
+                {mostrarCalculadoraOdd
+                  ? "Ocultar calculadora de odd"
+                  : "Mostrar calculadora de odd"}
+              </button>
             </div>
-          )}
 
-          <input
-            className={form.input}
-            type="text"
-            inputMode="decimal"
-            placeholder="Odd. Ex: 2.5 ou 2,5"
-            value={odd}
-            onChange={(e) => setOdd(e.target.value)}
-          />
+            {mostrarCalculadoraOdd && (
+              <div className={form.multiOddCard}>
+                <h3 className={form.multiOddTitle}>Calculadora de odd</h3>
+                <div className={form.multiOddRow}>
+                  <input
+                    className={form.input}
+                    type="text"
+                    placeholder="Ex: 4.0"
+                    value={oddMultiplaInput}
+                    onChange={(e) => setOddMultiplaInput(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className={form.buttonSecondary}
+                    onClick={adicionarOddMultipla}
+                  >
+                    + Adicionar
+                  </button>
+                </div>
 
-          <input
-            className={form.input}
-            type="text"
-            placeholder="R$ 0,00"
-            value={valorApostado}
-            onChange={(e) => setValorApostado(formatCurrency(e.target.value))}
-          />
+                {oddsMultipla.length > 0 && (
+                  <div className={form.oddsList}>
+                    {oddsMultipla.map((item, index) => (
+                      <div key={`${item}-${index}`} className={form.oddTag}>
+                        <span>{item}</span>
+                        <button
+                          type="button"
+                          className={form.removeOddButton}
+                          onClick={() => removerOddMultipla(index)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-          <select
-            className={form.input}
-            value={casaAposta}
-            onChange={(e) => setCasaAposta(e.target.value)}
-            disabled={loadingUsuario}
-          >
-            <option value="">
-              {loadingUsuario
-                ? "Carregando casa preferida..."
-                : "Selecione a casa"}
-            </option>
-            <option value="Betano">Betano</option>
-            <option value="Bet365">Bet365</option>
-            <option value="SuperBet">SuperBet</option>
-            <option value="SportingBet">SportingBet</option>
-            <option value="EsportivaBet">EsportivaBet</option>
-          </select>
+                <div className={form.multiOddActions}>
+                  <button
+                    type="button"
+                    className={form.button}
+                    onClick={calcularOddMultipla}
+                    disabled={loadingOdd}
+                  >
+                    {loadingOdd ? "Calculando..." : "Calcular"}
+                  </button>
+                  <button
+                    type="button"
+                    className={form.buttonSecondary}
+                    onClick={limparOddsMultipla}
+                    disabled={loadingOdd}
+                  >
+                    Limpar
+                  </button>
+                </div>
 
-          <select
-            className={form.input}
-            value={mercadoAposta ?? ""}
-            onChange={(e) => setMercadoAposta(Number(e.target.value))}
-          >
-            <option value="">Selecione o Mercado</option>
-            <option value="0">Escanteios</option>
-            <option value="1">Gols</option>
-            <option value="2">Cartões</option>
-            <option value="3">Ambas Marcam</option>
-            <option value="4">Resultado Final</option>
-            <option value="5">Basquete</option>
-          </select>
+                {oddCalculada !== null && (
+                  <div className={form.oddResultBox}>
+                    <span>Odd final</span>
+                    <strong>{oddCalculada}</strong>
+                  </div>
+                )}
+              </div>
+            )}
 
-          {!oddEhSeguraAutomatica && (
-            <select
-              className={form.input}
-              value={tipoAposta ?? ""}
-              onChange={(e) => setTipoAposta(Number(e.target.value))}
-            >
-              <option value="">Selecione o tipo</option>
-              <option value="0">Bingo</option>
-              <option value="2">Alavancagem</option>
-            </select>
-          )}
-
-          {oddEhSeguraAutomatica && (
             <input
               className={form.input}
               type="text"
-              value="Tipo de aposta: Segura"
-              disabled
+              inputMode="decimal"
+              placeholder="Odd. Ex: 2.5 ou 2,5"
+              value={odd}
+              onChange={(e) => setOdd(e.target.value)}
             />
-          )}
-
-          <select
-            className={form.input}
-            value={statusAposta ?? ""}
-            onChange={(e) => setStatusAposta(Number(e.target.value))}
-          >
-            <option value="">Selecione o status</option>
-            <option value="0">Pendente</option>
-            <option value="1">Ganha</option>
-            <option value="2">Perdida</option>
-            <option value="3">Cancelada</option>
-          </select>
-
-          <input
-            className={form.input}
-            type="datetime-local"
-            value={dataAposta}
-            onChange={(e) => setDataAposta(e.target.value)}
-          />
-
-          <div className={form.uploadBox}>
-            <label className={form.uploadLabel}>Imagem do bilhete</label>
 
             <input
               className={form.input}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              onChange={(e) => setImagemBilhete(e.target.files?.[0] || null)}
+              type="text"
+              placeholder="R$ 0,00"
+              value={valorApostado}
+              onChange={(e) => setValorApostado(formatCurrency(e.target.value))}
             />
 
-            {imagemBilhete && (
-              <p className={form.uploadInfo}>
-                Imagem selecionada: {imagemBilhete.name}
-              </p>
-            )}
-          </div>
+            <select
+              className={form.input}
+              value={casaAposta}
+              onChange={(e) => setCasaAposta(e.target.value)}
+              disabled={loadingUsuario}
+            >
+              <option value="">
+                {loadingUsuario ? "Carregando casa preferida..." : "Selecione a casa"}
+              </option>
+              <option value="Betano">Betano</option>
+              <option value="Bet365">Bet365</option>
+              <option value="SuperBet">SuperBet</option>
+              <option value="SportingBet">SportingBet</option>
+              <option value="EsportivaBet">EsportivaBet</option>
+            </select>
 
-          <button className={form.button} disabled={loading || loadingUsuario}>
-            {loading ? "⏳ Criando..." : "Criar"}
-          </button>
-        </form>
+            <select
+              className={form.input}
+              value={mercadoAposta ?? ""}
+              onChange={(e) => setMercadoAposta(Number(e.target.value))}
+            >
+              <option value="">Selecione o Mercado</option>
+              <option value="0">Escanteios</option>
+              <option value="1">Gols</option>
+              <option value="2">Cartões</option>
+              <option value="3">Ambas Marcam</option>
+              <option value="4">Resultado Final</option>
+              <option value="5">Basquete</option>
+            </select>
+
+            {!oddEhSeguraAutomatica && (
+              <select
+                className={form.input}
+                value={tipoAposta ?? ""}
+                onChange={(e) => setTipoAposta(Number(e.target.value))}
+              >
+                <option value="">Selecione o tipo</option>
+                <option value="0">Bingo</option>
+                <option value="2">Alavancagem</option>
+              </select>
+            )}
+
+            {oddEhSeguraAutomatica && (
+              <input
+                className={form.input}
+                type="text"
+                value="Tipo de aposta: Segura"
+                disabled
+              />
+            )}
+
+            <select
+              className={form.input}
+              value={statusAposta ?? ""}
+              onChange={(e) => setStatusAposta(Number(e.target.value))}
+            >
+              <option value="">Selecione o status</option>
+              <option value="0">Pendente</option>
+              <option value="1">Ganha</option>
+              <option value="2">Perdida</option>
+              <option value="3">Cancelada</option>
+            </select>
+
+            <input
+              className={form.input}
+              type="datetime-local"
+              value={dataAposta}
+              onChange={(e) => setDataAposta(e.target.value)}
+            />
+
+            <div className={form.uploadBox}>
+              <label className={form.uploadLabel}>Imagem do bilhete</label>
+              <input
+                className={form.input}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) => setImagemBilhete(e.target.files?.[0] || null)}
+              />
+              {imagemBilhete && (
+                <p className={form.uploadInfo}>
+                  Imagem selecionada: {imagemBilhete.name}
+                </p>
+              )}
+            </div>
+
+            <button className={form.button} disabled={loading || loadingUsuario}>
+              {loading ? "⏳ Criando..." : "Criar"}
+            </button>
+          </form>
+        )}
+
       </div>
     </div>
   );
 }
+
+const styles = {
+  toggleWrapper: {
+    display: "flex",
+    gap: "8px",
+    marginBottom: "24px",
+    background: "rgba(0,0,0,0.05)",
+    padding: "4px",
+    borderRadius: "10px",
+  },
+  toggleBtn: {
+    flex: 1,
+    padding: "8px 12px",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "14px",
+    fontWeight: "500",
+    cursor: "pointer",
+    background: "transparent",
+    color: "#888",
+    transition: "all 0.2s",
+  },
+  toggleBtnActive: {
+    background: "#fff",
+    color: "#111",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+  },
+  iaSection: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+  iaDesc: {
+    fontSize: "14px",
+    color: "#888",
+    margin: 0,
+  },
+  uploadArea: {
+    display: "block",
+    border: "2px dashed #ddd",
+    borderRadius: "12px",
+    padding: "24px 16px",
+    cursor: "pointer",
+    textAlign: "center",
+  },
+  uploadPlaceholder: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "6px",
+  },
+  uploadSelected: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "6px",
+  },
+  uploadIcon: {
+    fontSize: "28px",
+  },
+  uploadText: {
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#444",
+  },
+  uploadHint: {
+    fontSize: "12px",
+    color: "#aaa",
+  },
+  uploadFileName: {
+    fontSize: "13px",
+    color: "#333",
+    fontWeight: "500",
+  },
+  uploadChange: {
+    fontSize: "12px",
+    color: "#888",
+    textDecoration: "underline",
+  },
+  avisoIA: {
+    fontSize: "12px",
+    color: "#f59e0b",
+    margin: 0,
+    textAlign: "center",
+  },
+};

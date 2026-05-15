@@ -26,15 +26,18 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  margin-top: -60px; /* puxa tudo pra cima */
+  gap: 0; /* remove gap entre logo e card */
 }
 
 .loginLogoOutside {
   display: flex;
   justify-content: center;
+  margin-bottom: -10px; /* aproxima logo do card */
 }
 
 .loginLogo {
-  width: 300px;
+  width: 220px; /* reduz um pouco o logo */
   height: auto;
   object-fit: contain;
 }
