@@ -495,7 +495,7 @@ export default function BilhetesContent({ casa }) {
               </p>
             </div>
 
-            <div className={table.dashboardCard}>
+            {/* <div className={table.dashboardCard}>
               <p className={table.dashboardTitle}>ROI</p>
               <p
                 className={`${table.dashboardValue} ${
@@ -506,7 +506,7 @@ export default function BilhetesContent({ casa }) {
               >
                 {dashboard.roi}
               </p>
-            </div>
+            </div> */}
           </div>
         )}
 
