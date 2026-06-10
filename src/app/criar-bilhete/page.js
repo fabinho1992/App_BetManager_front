@@ -173,9 +173,7 @@ export default function CriarBilhete() {
       setConfirmando(true);
 
       // CORRIGIDO: converte odd garantindo ponto como separador
-      const oddFormatada = String(dadosExtraidos.odd ?? 0)
-        .replace(",", ".")
-        .replace(".", ","); // backend espera vírgula igual ao modo manual
+      const oddFormatada = String(dadosExtraidos.odd ?? 0).replace(",", "."); 
 
       const formData = new FormData();
       formData.append("odd", oddFormatada);
@@ -269,7 +267,7 @@ export default function CriarBilhete() {
         return;
       }
       const formData = new FormData();
-      formData.append("odd", parseOdd(odd).toString().replace(".", ","));
+      formData.append("odd", parseOdd(odd).toString()); 
       formData.append("valorApostado", parseCurrency(valorApostado));
       formData.append("tipoBanca", oddEhSeguraAutomatica ? 1 : tipoAposta);
       formData.append("statusEnum", statusAposta);
