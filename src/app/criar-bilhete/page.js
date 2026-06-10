@@ -51,7 +51,10 @@ export default function CriarBilhete() {
   function formatCurrency(value) {
     value = value.replace(/\D/g, "");
     const number = Number(value) / 100;
-    return number.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    return number.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
   }
 
   function parseCurrency(value) {
@@ -76,7 +79,10 @@ export default function CriarBilhete() {
 
   function adicionarOddMultipla() {
     const valor = Number(oddMultiplaInput.replace(",", "."));
-    if (!valor || valor <= 1) { toast.error("Informe uma odd válida maior que 1."); return; }
+    if (!valor || valor <= 1) {
+      toast.error("Informe uma odd válida maior que 1.");
+      return;
+    }
     setOddsMultipla((prev) => [...prev, valor]);
     setOddMultiplaInput("");
   }
@@ -86,10 +92,15 @@ export default function CriarBilhete() {
   }
 
   async function calcularOddMultipla() {
-    if (oddsMultipla.length === 0) { toast.error("Adicione ao menos uma odd."); return; }
+    if (oddsMultipla.length === 0) {
+      toast.error("Adicione ao menos uma odd.");
+      return;
+    }
     try {
       setLoadingOdd(true);
-      const response = await api.post("/Bilhete/calcular-odd", { odds: oddsMultipla });
+      const response = await api.post("/Bilhete/calcular-odd", {
+        odds: oddsMultipla,
+      });
       const oddFinal = response.data.data.oddFinal;
       setOddCalculada(oddFinal);
       setOdd(String(oddFinal));
@@ -118,7 +129,10 @@ export default function CriarBilhete() {
 
   // Etapa 1 — Analisa imagem, retorna dados sem criar bilhete
   async function handleAnalisarImagem() {
-    if (!imagemBilhete) { toast.error("Selecione uma imagem primeiro."); return; }
+    if (!imagemBilhete) {
+      toast.error("Selecione uma imagem primeiro.");
+      return;
+    }
     if (!validarImagem(imagemBilhete)) return;
 
     try {
@@ -126,7 +140,10 @@ export default function CriarBilhete() {
       const formData = new FormData();
       formData.append("imagem", imagemBilhete);
 
-      const response = await api.post("/Bilhete/analisar-imagem-preview", formData);
+      const response = await api.post(
+        "/Bilhete/analisar-imagem-preview",
+        formData,
+      );
       const dados = response.data.data;
 
       setDadosExtraidos(dados);
@@ -143,8 +160,14 @@ export default function CriarBilhete() {
 
   // Etapa 2 — Confirma dados e cria o bilhete
   async function handleConfirmarBilhete() {
-    if (!casaApostaIA) { toast.error("Selecione a casa de aposta."); return; }
-    if (!dataApostaIA) { toast.error("Informe a data da aposta."); return; }
+    if (!casaApostaIA) {
+      toast.error("Selecione a casa de aposta.");
+      return;
+    }
+    if (!dataApostaIA) {
+      toast.error("Informe a data da aposta.");
+      return;
+    }
 
     try {
       setConfirmando(true);
@@ -162,13 +185,30 @@ export default function CriarBilhete() {
       formData.append("dataAposta", new Date(dataApostaIA).toISOString());
       if (imagemBilhete) formData.append("imagem", imagemBilhete);
 
+      console.log("=== DADOS ENVIADOS AO BACKEND ===");
+      console.log(
+        "odd raw:",
+        dadosExtraidos.odd,
+        "| tipo:",
+        typeof dadosExtraidos.odd,
+      );
+      console.log("odd formatada:", oddFormatada);
+      console.log(
+        "valorApostado:",
+        dadosExtraidos.valorApostado,
+        "| tipo:",
+        typeof dadosExtraidos.valorApostado,
+      );
       await api.post("/Bilhete/confirmar-imagem", formData);
 
       toast.success("Bilhete criado com sucesso!");
       atualizarBancaHeader();
       router.push("/bilhetes");
     } catch (error) {
-      console.error("Erro ao confirmar bilhete:", error.response?.data || error);
+      console.error(
+        "Erro ao confirmar bilhete:",
+        error.response?.data || error,
+      );
       toast.error("Erro ao criar bilhete. Tente novamente.");
     } finally {
       setConfirmando(false);
@@ -177,7 +217,10 @@ export default function CriarBilhete() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) { router.push("/"); return; }
+    if (!token) {
+      router.push("/");
+      return;
+    }
 
     async function carregarCasaPreferida() {
       try {
@@ -185,7 +228,10 @@ export default function CriarBilhete() {
         const usuario = response.data.data;
         if (usuario?.casaPreferida) setCasaAposta(usuario.casaPreferida);
       } catch (error) {
-        console.error("Erro ao carregar usuário:", error.response?.data || error);
+        console.error(
+          "Erro ao carregar usuário:",
+          error.response?.data || error,
+        );
       } finally {
         setLoadingUsuario(false);
       }
@@ -202,16 +248,25 @@ export default function CriarBilhete() {
     e.preventDefault();
     try {
       setLoading(true);
-      if (!odd || !valorApostado || statusAposta === null || !casaAposta || mercadoAposta === null) {
-        toast.error("Preencha todos os campos"); return;
+      if (
+        !odd ||
+        !valorApostado ||
+        statusAposta === null ||
+        !casaAposta ||
+        mercadoAposta === null
+      ) {
+        toast.error("Preencha todos os campos");
+        return;
       }
       if (!oddEhSeguraAutomatica && tipoAposta === null) {
-        toast.error("Selecione o tipo de aposta"); return;
+        toast.error("Selecione o tipo de aposta");
+        return;
       }
       if (!validarImagem(imagemBilhete)) return;
       const oddConvertida = parseOdd(odd);
       if (!oddConvertida || Number.isNaN(oddConvertida) || oddConvertida <= 1) {
-        toast.error("Informe uma odd válida."); return;
+        toast.error("Informe uma odd válida.");
+        return;
       }
       const formData = new FormData();
       formData.append("odd", parseOdd(odd).toString().replace(".", ","));
@@ -220,8 +275,10 @@ export default function CriarBilhete() {
       formData.append("statusEnum", statusAposta);
       formData.append("casaAposta", casaAposta);
       formData.append("mercado", mercadoAposta);
-      if (dataAposta) formData.append("dataAposta", new Date(dataAposta).toISOString());
+      if (dataAposta)
+        formData.append("dataAposta", new Date(dataAposta).toISOString());
       if (imagemBilhete) formData.append("imagem", imagemBilhete);
+
       await api.post("/bilhete", formData);
       toast.success("Bilhete criado com sucesso!");
       atualizarBancaHeader();
@@ -237,9 +294,12 @@ export default function CriarBilhete() {
   return (
     <div className={layout.container}>
       <div className={layout.card}>
-
         <div className={form.headerTop}>
-          <button type="button" className={form.buttonBack} onClick={() => router.push("/dashboard")}>
+          <button
+            type="button"
+            className={form.buttonBack}
+            onClick={() => router.push("/dashboard")}
+          >
             ← Volta
           </button>
         </div>
@@ -250,14 +310,23 @@ export default function CriarBilhete() {
         <div style={styles.toggleWrapper}>
           <button
             type="button"
-            style={{ ...styles.toggleBtn, ...(!modoIA ? styles.toggleBtnActive : {}) }}
-            onClick={() => { setModoIA(false); resetarModoIA(); }}
+            style={{
+              ...styles.toggleBtn,
+              ...(!modoIA ? styles.toggleBtnActive : {}),
+            }}
+            onClick={() => {
+              setModoIA(false);
+              resetarModoIA();
+            }}
           >
             Manual
           </button>
           <button
             type="button"
-            style={{ ...styles.toggleBtn, ...(modoIA ? styles.toggleBtnActive : {}) }}
+            style={{
+              ...styles.toggleBtn,
+              ...(modoIA ? styles.toggleBtnActive : {}),
+            }}
             onClick={() => setModoIA(true)}
           >
             🤖 Analisar com IA
@@ -265,9 +334,8 @@ export default function CriarBilhete() {
         </div>
 
         {/* MODO IA */}
-        {modoIA && (
-          !dadosExtraidos ? (
-
+        {modoIA &&
+          (!dadosExtraidos ? (
             // ETAPA 1 — Upload
             <div style={styles.iaSection}>
               <p style={styles.iaDesc}>
@@ -289,14 +357,20 @@ export default function CriarBilhete() {
                 {imagemBilhete ? (
                   <div style={styles.uploadSelected}>
                     <span style={styles.uploadIcon}>🖼️</span>
-                    <span style={styles.uploadFileName}>{imagemBilhete.name}</span>
+                    <span style={styles.uploadFileName}>
+                      {imagemBilhete.name}
+                    </span>
                     <span style={styles.uploadChange}>Trocar imagem</span>
                   </div>
                 ) : (
                   <div style={styles.uploadPlaceholder}>
                     <span style={styles.uploadIcon}>📎</span>
-                    <span style={styles.uploadText}>Clique para selecionar a imagem</span>
-                    <span style={styles.uploadHint}>JPG, PNG ou WEBP • Máx 5MB</span>
+                    <span style={styles.uploadText}>
+                      Clique para selecionar a imagem
+                    </span>
+                    <span style={styles.uploadHint}>
+                      JPG, PNG ou WEBP • Máx 5MB
+                    </span>
                   </div>
                 )}
               </label>
@@ -311,9 +385,7 @@ export default function CriarBilhete() {
                 {analisando ? "⏳ Analisando imagem..." : "🤖 Analisar imagem"}
               </button>
             </div>
-
           ) : (
-
             // ETAPA 2 — Confirmação
             <div style={styles.iaSection}>
               <p style={styles.iaDesc}>
@@ -321,7 +393,9 @@ export default function CriarBilhete() {
               </p>
 
               <div style={styles.dadosExtraidosBox}>
-                <p style={styles.dadosExtraidosLabel}>Dados extraídos pela IA</p>
+                <p style={styles.dadosExtraidosLabel}>
+                  Dados extraídos pela IA
+                </p>
 
                 {/* NOVO: preview da imagem */}
                 {previewImagem && (
@@ -341,7 +415,9 @@ export default function CriarBilhete() {
                 <div style={styles.dadosGrid}>
                   <div style={styles.dadoItem}>
                     <span style={styles.dadoLabel}>Odd</span>
-                    <span style={styles.dadoValor}>{dadosExtraidos.odd ?? "—"}</span>
+                    <span style={styles.dadoValor}>
+                      {dadosExtraidos.odd ?? "—"}
+                    </span>
                   </div>
                   <div style={styles.dadoItem}>
                     <span style={styles.dadoLabel}>Valor apostado</span>
@@ -353,7 +429,9 @@ export default function CriarBilhete() {
                   </div>
                   <div style={styles.dadoItem}>
                     <span style={styles.dadoLabel}>Mercado</span>
-                    <span style={styles.dadoValor}>{dadosExtraidos.mercado ?? "—"}</span>
+                    <span style={styles.dadoValor}>
+                      {dadosExtraidos.mercado ?? "—"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -387,7 +465,9 @@ export default function CriarBilhete() {
                 disabled={confirmando}
                 style={{ opacity: confirmando ? 0.6 : 1 }}
               >
-                {confirmando ? "⏳ Criando bilhete..." : "✅ Confirmar e criar bilhete"}
+                {confirmando
+                  ? "⏳ Criando bilhete..."
+                  : "✅ Confirmar e criar bilhete"}
               </button>
 
               <button
@@ -398,20 +478,20 @@ export default function CriarBilhete() {
                 ← Analisar outra imagem
               </button>
             </div>
-          )
-        )}
+          ))}
 
         {/* MODO MANUAL */}
         {!modoIA && (
           <form className={form.form} onSubmit={handleSubmit}>
-
             <div className={form.calculatorToggleWrapper}>
               <button
                 type="button"
                 className={form.calculatorToggleButton}
                 onClick={() => setMostrarCalculadoraOdd((prev) => !prev)}
               >
-                {mostrarCalculadoraOdd ? "Ocultar calculadora de odd" : "Mostrar calculadora de odd"}
+                {mostrarCalculadoraOdd
+                  ? "Ocultar calculadora de odd"
+                  : "Mostrar calculadora de odd"}
               </button>
             </div>
 
@@ -426,7 +506,11 @@ export default function CriarBilhete() {
                     value={oddMultiplaInput}
                     onChange={(e) => setOddMultiplaInput(e.target.value)}
                   />
-                  <button type="button" className={form.buttonSecondary} onClick={adicionarOddMultipla}>
+                  <button
+                    type="button"
+                    className={form.buttonSecondary}
+                    onClick={adicionarOddMultipla}
+                  >
                     + Adicionar
                   </button>
                 </div>
@@ -435,16 +519,32 @@ export default function CriarBilhete() {
                     {oddsMultipla.map((item, index) => (
                       <div key={`${item}-${index}`} className={form.oddTag}>
                         <span>{item}</span>
-                        <button type="button" className={form.removeOddButton} onClick={() => removerOddMultipla(index)}>✕</button>
+                        <button
+                          type="button"
+                          className={form.removeOddButton}
+                          onClick={() => removerOddMultipla(index)}
+                        >
+                          ✕
+                        </button>
                       </div>
                     ))}
                   </div>
                 )}
                 <div className={form.multiOddActions}>
-                  <button type="button" className={form.button} onClick={calcularOddMultipla} disabled={loadingOdd}>
+                  <button
+                    type="button"
+                    className={form.button}
+                    onClick={calcularOddMultipla}
+                    disabled={loadingOdd}
+                  >
                     {loadingOdd ? "Calculando..." : "Calcular"}
                   </button>
-                  <button type="button" className={form.buttonSecondary} onClick={limparOddsMultipla} disabled={loadingOdd}>
+                  <button
+                    type="button"
+                    className={form.buttonSecondary}
+                    onClick={limparOddsMultipla}
+                    disabled={loadingOdd}
+                  >
                     Limpar
                   </button>
                 </div>
@@ -457,11 +557,33 @@ export default function CriarBilhete() {
               </div>
             )}
 
-            <input className={form.input} type="text" inputMode="decimal" placeholder="Odd. Ex: 2.5 ou 2,5" value={odd} onChange={(e) => setOdd(e.target.value)} />
-            <input className={form.input} type="text" placeholder="R$ 0,00" value={valorApostado} onChange={(e) => setValorApostado(formatCurrency(e.target.value))} />
+            <input
+              className={form.input}
+              type="text"
+              inputMode="decimal"
+              placeholder="Odd. Ex: 2.5 ou 2,5"
+              value={odd}
+              onChange={(e) => setOdd(e.target.value)}
+            />
+            <input
+              className={form.input}
+              type="text"
+              placeholder="R$ 0,00"
+              value={valorApostado}
+              onChange={(e) => setValorApostado(formatCurrency(e.target.value))}
+            />
 
-            <select className={form.input} value={casaAposta} onChange={(e) => setCasaAposta(e.target.value)} disabled={loadingUsuario}>
-              <option value="">{loadingUsuario ? "Carregando casa preferida..." : "Selecione a casa"}</option>
+            <select
+              className={form.input}
+              value={casaAposta}
+              onChange={(e) => setCasaAposta(e.target.value)}
+              disabled={loadingUsuario}
+            >
+              <option value="">
+                {loadingUsuario
+                  ? "Carregando casa preferida..."
+                  : "Selecione a casa"}
+              </option>
               <option value="Betano">Betano</option>
               <option value="Bet365">Bet365</option>
               <option value="SuperBet">SuperBet</option>
@@ -469,7 +591,11 @@ export default function CriarBilhete() {
               <option value="EsportivaBet">EsportivaBet</option>
             </select>
 
-            <select className={form.input} value={mercadoAposta ?? ""} onChange={(e) => setMercadoAposta(Number(e.target.value))}>
+            <select
+              className={form.input}
+              value={mercadoAposta ?? ""}
+              onChange={(e) => setMercadoAposta(Number(e.target.value))}
+            >
               <option value="">Selecione o Mercado</option>
               <option value="0">Escanteios</option>
               <option value="1">Gols</option>
@@ -480,7 +606,11 @@ export default function CriarBilhete() {
             </select>
 
             {!oddEhSeguraAutomatica && (
-              <select className={form.input} value={tipoAposta ?? ""} onChange={(e) => setTipoAposta(Number(e.target.value))}>
+              <select
+                className={form.input}
+                value={tipoAposta ?? ""}
+                onChange={(e) => setTipoAposta(Number(e.target.value))}
+              >
                 <option value="">Selecione o tipo</option>
                 <option value="0">Bingo</option>
                 <option value="2">Alavancagem</option>
@@ -488,10 +618,19 @@ export default function CriarBilhete() {
             )}
 
             {oddEhSeguraAutomatica && (
-              <input className={form.input} type="text" value="Tipo de aposta: Segura" disabled />
+              <input
+                className={form.input}
+                type="text"
+                value="Tipo de aposta: Segura"
+                disabled
+              />
             )}
 
-            <select className={form.input} value={statusAposta ?? ""} onChange={(e) => setStatusAposta(Number(e.target.value))}>
+            <select
+              className={form.input}
+              value={statusAposta ?? ""}
+              onChange={(e) => setStatusAposta(Number(e.target.value))}
+            >
               <option value="">Selecione o status</option>
               <option value="0">Pendente</option>
               <option value="1">Ganha</option>
@@ -499,20 +638,36 @@ export default function CriarBilhete() {
               <option value="3">Cancelada</option>
             </select>
 
-            <input className={form.input} type="datetime-local" value={dataAposta} onChange={(e) => setDataAposta(e.target.value)} />
+            <input
+              className={form.input}
+              type="datetime-local"
+              value={dataAposta}
+              onChange={(e) => setDataAposta(e.target.value)}
+            />
 
             <div className={form.uploadBox}>
               <label className={form.uploadLabel}>Imagem do bilhete</label>
-              <input className={form.input} type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => setImagemBilhete(e.target.files?.[0] || null)} />
-              {imagemBilhete && <p className={form.uploadInfo}>Imagem selecionada: {imagemBilhete.name}</p>}
+              <input
+                className={form.input}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(e) => setImagemBilhete(e.target.files?.[0] || null)}
+              />
+              {imagemBilhete && (
+                <p className={form.uploadInfo}>
+                  Imagem selecionada: {imagemBilhete.name}
+                </p>
+              )}
             </div>
 
-            <button className={form.button} disabled={loading || loadingUsuario}>
+            <button
+              className={form.button}
+              disabled={loading || loadingUsuario}
+            >
               {loading ? "⏳ Criando..." : "Criar"}
             </button>
           </form>
         )}
-
       </div>
     </div>
   );
@@ -520,40 +675,79 @@ export default function CriarBilhete() {
 
 const styles = {
   toggleWrapper: {
-    display: "flex", gap: "8px", marginBottom: "24px",
-    background: "rgba(0,0,0,0.05)", padding: "4px", borderRadius: "10px",
+    display: "flex",
+    gap: "8px",
+    marginBottom: "24px",
+    background: "rgba(0,0,0,0.05)",
+    padding: "4px",
+    borderRadius: "10px",
   },
   toggleBtn: {
-    flex: 1, padding: "8px 12px", border: "none", borderRadius: "8px",
-    fontSize: "14px", fontWeight: "500", cursor: "pointer",
-    background: "transparent", color: "#888", transition: "all 0.2s",
+    flex: 1,
+    padding: "8px 12px",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "14px",
+    fontWeight: "500",
+    cursor: "pointer",
+    background: "transparent",
+    color: "#888",
+    transition: "all 0.2s",
   },
   toggleBtnActive: {
-    background: "#fff", color: "#111", boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+    background: "#fff",
+    color: "#111",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
   },
   iaSection: { display: "flex", flexDirection: "column", gap: "16px" },
   iaDesc: { fontSize: "14px", color: "#888", margin: 0 },
   uploadArea: {
-    display: "block", border: "2px dashed #ddd", borderRadius: "12px",
-    padding: "24px 16px", cursor: "pointer", textAlign: "center",
+    display: "block",
+    border: "2px dashed #ddd",
+    borderRadius: "12px",
+    padding: "24px 16px",
+    cursor: "pointer",
+    textAlign: "center",
   },
-  uploadPlaceholder: { display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" },
-  uploadSelected: { display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" },
+  uploadPlaceholder: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "6px",
+  },
+  uploadSelected: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "6px",
+  },
   uploadIcon: { fontSize: "28px" },
   uploadText: { fontSize: "14px", fontWeight: "500", color: "#444" },
   uploadHint: { fontSize: "12px", color: "#aaa" },
   uploadFileName: { fontSize: "13px", color: "#333", fontWeight: "500" },
-  uploadChange: { fontSize: "12px", color: "#888", textDecoration: "underline" },
+  uploadChange: {
+    fontSize: "12px",
+    color: "#888",
+    textDecoration: "underline",
+  },
   dadosExtraidosBox: {
     background: "rgba(255,255,255,0.04)",
     border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: "12px", padding: "14px",
+    borderRadius: "12px",
+    padding: "14px",
   },
   dadosExtraidosLabel: {
-    fontSize: "12px", color: "#888", margin: "0 0 10px 0",
-    textTransform: "uppercase", letterSpacing: "0.5px",
+    fontSize: "12px",
+    color: "#888",
+    margin: "0 0 10px 0",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
   },
-  dadosGrid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" },
+  dadosGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "10px",
+  },
   dadoItem: { display: "flex", flexDirection: "column", gap: "4px" },
   dadoLabel: { fontSize: "11px", color: "#666" },
   dadoValor: { fontSize: "15px", fontWeight: "600", color: "#fff" },
