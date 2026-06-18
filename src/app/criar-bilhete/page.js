@@ -36,7 +36,8 @@ export default function CriarBilhete() {
   const [casaApostaIA, setCasaApostaIA] = useState("");
   const [dataApostaIA, setDataApostaIA] = useState("");
   const [confirmando, setConfirmando] = useState(false);
-  const [previewImagem, setPreviewImagem] = useState(null); // NOVO
+  const [confirmandoEContinuando, setConfirmandoEContinuando] = useState(false);
+  const [previewImagem, setPreviewImagem] = useState(null);
 
   const router = useRouter();
 
@@ -124,7 +125,7 @@ export default function CriarBilhete() {
     setCasaApostaIA("");
     setDataApostaIA("");
     setImagemBilhete(null);
-    setPreviewImagem(null); // NOVO
+    setPreviewImagem(null);
   }
 
   // Etapa 1 — Analisa imagem, retorna dados sem criar bilhete
@@ -158,58 +159,56 @@ export default function CriarBilhete() {
     }
   }
 
-  // Etapa 2 — Confirma dados e cria o bilhete
-  async function handleConfirmarBilhete() {
-    if (!casaApostaIA) {
-      toast.error("Selecione a casa de aposta.");
-      return;
-    }
-    if (!dataApostaIA) {
-      toast.error("Informe a data da aposta.");
-      return;
-    }
+  // Monta o formData comum para os dois botões de confirmação
+  function montarFormData() {
+    const oddFormatada = String(dadosExtraidos.odd ?? 0).replace(",", ".");
+    const formData = new FormData();
+    formData.append("odd", oddFormatada);
+    formData.append("valorApostado", dadosExtraidos.valorApostado ?? 0);
+    formData.append("casaAposta", casaApostaIA);
+    formData.append("mercado", dadosExtraidos.mercado ?? "ResultadoFinal");
+    formData.append("dataAposta", new Date(dataApostaIA).toISOString());
+    if (imagemBilhete) formData.append("imagem", imagemBilhete);
+    return formData;
+  }
 
+  function validarCamposIA() {
+    if (!casaApostaIA) { toast.error("Selecione a casa de aposta."); return false; }
+    if (!dataApostaIA) { toast.error("Informe a data da aposta."); return false; }
+    return true;
+  }
+
+  // Etapa 2a — Confirma e vai para a lista
+  async function handleConfirmarBilhete() {
+    if (!validarCamposIA()) return;
     try {
       setConfirmando(true);
-
-      // CORRIGIDO: converte odd garantindo ponto como separador
-      const oddFormatada = String(dadosExtraidos.odd ?? 0).replace(",", "."); 
-
-      const formData = new FormData();
-      formData.append("odd", oddFormatada);
-      formData.append("valorApostado", dadosExtraidos.valorApostado ?? 0);
-      formData.append("casaAposta", casaApostaIA);
-      formData.append("mercado", dadosExtraidos.mercado ?? "ResultadoFinal");
-      formData.append("dataAposta", new Date(dataApostaIA).toISOString());
-      if (imagemBilhete) formData.append("imagem", imagemBilhete);
-
-      console.log("=== DADOS ENVIADOS AO BACKEND ===");
-      console.log(
-        "odd raw:",
-        dadosExtraidos.odd,
-        "| tipo:",
-        typeof dadosExtraidos.odd,
-      );
-      console.log("odd formatada:", oddFormatada);
-      console.log(
-        "valorApostado:",
-        dadosExtraidos.valorApostado,
-        "| tipo:",
-        typeof dadosExtraidos.valorApostado,
-      );
-      await api.post("/Bilhete/confirmar-imagem", formData);
-
+      await api.post("/Bilhete/confirmar-imagem", montarFormData());
       toast.success("Bilhete criado com sucesso!");
       atualizarBancaHeader();
       router.push("/bilhetes");
     } catch (error) {
-      console.error(
-        "Erro ao confirmar bilhete:",
-        error.response?.data || error,
-      );
+      console.error("Erro ao confirmar bilhete:", error.response?.data || error);
       toast.error("Erro ao criar bilhete. Tente novamente.");
     } finally {
       setConfirmando(false);
+    }
+  }
+
+  // Etapa 2b — Confirma e fica na página para criar outro
+  async function handleConfirmarEContinuar() {
+    if (!validarCamposIA()) return;
+    try {
+      setConfirmandoEContinuando(true);
+      await api.post("/Bilhete/confirmar-imagem", montarFormData());
+      toast.success("Bilhete criado! Envie outro print.");
+      atualizarBancaHeader();
+      resetarModoIA();
+    } catch (error) {
+      console.error("Erro ao confirmar bilhete:", error.response?.data || error);
+      toast.error("Erro ao criar bilhete. Tente novamente.");
+    } finally {
+      setConfirmandoEContinuando(false);
     }
   }
 
@@ -267,7 +266,7 @@ export default function CriarBilhete() {
         return;
       }
       const formData = new FormData();
-      formData.append("odd", parseOdd(odd).toString()); 
+      formData.append("odd", parseOdd(odd).toString());
       formData.append("valorApostado", parseCurrency(valorApostado));
       formData.append("tipoBanca", oddEhSeguraAutomatica ? 1 : tipoAposta);
       formData.append("statusEnum", statusAposta);
@@ -288,6 +287,8 @@ export default function CriarBilhete() {
       setLoading(false);
     }
   }
+
+  const qualquerConfirmando = confirmando || confirmandoEContinuando;
 
   return (
     <div className={layout.container}>
@@ -347,7 +348,6 @@ export default function CriarBilhete() {
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
                     setImagemBilhete(file);
-                    // NOVO: gera preview
                     setPreviewImagem(file ? URL.createObjectURL(file) : null);
                   }}
                   style={{ display: "none" }}
@@ -395,7 +395,6 @@ export default function CriarBilhete() {
                   Dados extraídos pela IA
                 </p>
 
-                {/* NOVO: preview da imagem */}
                 {previewImagem && (
                   <img
                     src={previewImagem}
@@ -456,22 +455,32 @@ export default function CriarBilhete() {
                 onChange={(e) => setDataApostaIA(e.target.value)}
               />
 
+              {/* Botões de confirmação */}
               <button
                 type="button"
                 className={form.button}
                 onClick={handleConfirmarBilhete}
-                disabled={confirmando}
-                style={{ opacity: confirmando ? 0.6 : 1 }}
+                disabled={qualquerConfirmando}
+                style={{ opacity: qualquerConfirmando ? 0.6 : 1 }}
               >
-                {confirmando
-                  ? "⏳ Criando bilhete..."
-                  : "✅ Confirmar e criar bilhete"}
+                {confirmando ? "⏳ Criando bilhete..." : "✅ Criar e ir para a lista"}
+              </button>
+
+              <button
+                type="button"
+                className={form.buttonSecondary}
+                onClick={handleConfirmarEContinuar}
+                disabled={qualquerConfirmando}
+                style={{ opacity: qualquerConfirmando ? 0.6 : 1 }}
+              >
+                {confirmandoEContinuando ? "⏳ Criando bilhete..." : "➕ Criar e adicionar outro"}
               </button>
 
               <button
                 type="button"
                 className={form.buttonSecondary}
                 onClick={resetarModoIA}
+                disabled={qualquerConfirmando}
               >
                 ← Analisar outra imagem
               </button>
